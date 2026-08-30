@@ -1,0 +1,2442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Petit Français - French for Kids 🇫🇷</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Canvas Confetti -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Quicksand:wght@500;600;700;800&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            fredoka: ['Fredoka', 'sans-serif'],
+            quicksand: ['Quicksand', 'sans-serif'],
+          },
+          colors: {
+            frenchBlue: '#2563EB',
+            frenchRed: '#EF4444',
+            sunnyYellow: '#FBBF24',
+            mintGreen: '#10B981',
+            softPurple: '#8B5CF6',
+            bubbleGum: '#EC4899',
+            cloudBg: '#F0F7FF',
+          },
+          keyframes: {
+            bounceSlow: {
+              '0%, 100%': { transform: 'translateY(0)' },
+              '50%': { transform: 'translateY(-6px)' }
+            },
+            popIn: {
+              '0%': { transform: 'scale(0.8)', opacity: '0' },
+              '100%': { transform: 'scale(1)', opacity: '1' }
+            },
+            pulseBorder: {
+              '0%, 100%': { borderColor: 'rgba(59, 130, 246, 0.4)' },
+              '50%': { borderColor: 'rgba(239, 68, 68, 0.8)' }
+            }
+          },
+          animation: {
+            'bounce-slow': 'bounceSlow 2.5s infinite ease-in-out',
+            'pop-in': 'popIn 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards',
+            'pulse-border': 'pulseBorder 2s infinite'
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      font-family: 'Quicksand', sans-serif;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .heading-font {
+      font-family: 'Fredoka', cursive;
+    }
+    .game-card {
+      transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .game-card:hover {
+      transform: translateY(-4px);
+    }
+    .game-card:active {
+      transform: translateY(2px);
+    }
+    /* Custom scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #e2e8f0;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #93c5fd;
+      border-radius: 999px;
+    }
+    /* Floating mascot animation */
+    @keyframes floaty {
+      0%, 100% { transform: translateY(0px) rotate(0deg); }
+      50% { transform: translateY(-8px) rotate(2deg); }
+    }
+    .mascot-float {
+      animation: floaty 3s ease-in-out infinite;
+    }
+  </style>
+</head>
+<body class="bg-cloudBg text-slate-800 min-h-screen flex flex-col justify-between">
+
+  <!-- TOP HEADER / NAV -->
+  <header class="bg-white/90 backdrop-blur-md border-b-4 border-blue-200 sticky top-0 z-40 px-4 py-3 shadow-sm">
+    <div class="max-w-6xl mx-auto flex items-center justify-between">
+      <!-- Logo -->
+      <div onclick="navigate('home')" class="flex items-center gap-3 cursor-pointer group">
+        <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-blue-500 via-indigo-500 to-frenchRed flex items-center justify-center text-white shadow-md text-2xl mascot-float">
+          🥐
+        </div>
+        <div>
+          <h1 class="heading-font text-2xl font-bold text-blue-600 tracking-wide flex items-center gap-2">
+            Petit Français <span class="text-xs bg-red-100 text-frenchRed px-2 py-0.5 rounded-full uppercase tracking-wider font-extrabold">Kids</span>
+          </h1>
+          <p class="text-xs font-bold text-slate-400">Fun French Adventures!</p>
+        </div>
+      </div>
+
+      <!-- Quick Stats Pill (XP, Streak, Words) -->
+      <div class="flex items-center gap-2 sm:gap-4">
+        <!-- Streak -->
+        <div class="flex items-center gap-1.5 bg-amber-50 border-2 border-amber-300 px-3 py-1.5 rounded-2xl shadow-inner text-amber-600 font-bold text-sm">
+          <i class="fa-solid fa-fire text-amber-500 text-base animate-bounce"></i>
+          <span id="nav-streak">1</span> <span class="hidden sm:inline text-xs text-amber-500">Day</span>
+        </div>
+
+        <!-- XP Badge -->
+        <div class="flex items-center gap-1.5 bg-purple-50 border-2 border-purple-300 px-3 py-1.5 rounded-2xl shadow-inner text-softPurple font-bold text-sm">
+          <i class="fa-solid fa-star text-yellow-400 text-base"></i>
+          <span id="nav-xp">0</span> <span class="hidden sm:inline text-xs text-purple-400">XP</span>
+        </div>
+
+        <!-- Audio tester -->
+        <button onclick="speakFrench('Bonjour! Bienvenue!', true)" title="Test Audio" class="p-2 w-10 h-10 rounded-2xl bg-blue-100 hover:bg-blue-200 text-frenchBlue flex items-center justify-center transition">
+          <i class="fa-solid fa-volume-high"></i>
+        </button>
+
+        <!-- Parents area button -->
+        <button onclick="openParentModal()" title="Parent & Teacher Zone" class="p-2 w-10 h-10 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center transition">
+          <i class="fa-solid fa-user-shield"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN APP CONTAINER -->
+  <main id="app-viewport" class="max-w-5xl mx-auto w-full px-4 py-6 flex-1">
+    <!-- View will be rendered dynamically by JavaScript -->
+  </main>
+
+  <!-- BOTTOM NAVIGATION BAR (Child Friendly) -->
+  <nav class="bg-white border-t-4 border-blue-200 py-2 px-3 sticky bottom-0 z-30 shadow-lg">
+    <div class="max-w-md mx-auto flex justify-around items-center">
+      <button onclick="navigate('home')" id="tab-home" class="nav-tab flex flex-col items-center gap-1 text-frenchBlue transition font-bold text-xs p-2 rounded-2xl">
+        <div class="w-10 h-10 rounded-2xl bg-blue-100 flex items-center justify-center text-lg">
+          🏠
+        </div>
+        <span>Home</span>
+      </button>
+
+      <button onclick="navigate('map')" id="tab-map" class="nav-tab flex flex-col items-center gap-1 text-slate-400 transition font-bold text-xs p-2 rounded-2xl">
+        <div class="w-10 h-10 rounded-2xl bg-slate-100 flex items-center justify-center text-lg">
+          🗺️
+        </div>
+        <span>Map</span>
+      </button>
+
+      <button onclick="navigate('vocab')" id="tab-vocab" class="nav-tab flex flex-col items-center gap-1 text-slate-400 transition font-bold text-xs p-2 rounded-2xl">
+        <div class="w-10 h-10 rounded-2xl bg-slate-100 flex items-center justify-center text-lg">
+          📚
+        </div>
+        <span>Words</span>
+      </button>
+
+      <button onclick="navigate('games')" id="tab-games" class="nav-tab flex flex-col items-center gap-1 text-slate-400 transition font-bold text-xs p-2 rounded-2xl">
+        <div class="w-10 h-10 rounded-2xl bg-slate-100 flex items-center justify-center text-lg">
+          🎮
+        </div>
+        <span>Games</span>
+      </button>
+
+      <button onclick="navigate('badges')" id="tab-badges" class="nav-tab flex flex-col items-center gap-1 text-slate-400 transition font-bold text-xs p-2 rounded-2xl">
+        <div class="w-10 h-10 rounded-2xl bg-slate-100 flex items-center justify-center text-lg">
+          🏆
+        </div>
+        <span>Badges</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- MODAL / DIALOG CONTAINER -->
+  <div id="modal-container" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div id="modal-card" class="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border-4 border-blue-300 relative animate-pop-in">
+      <!-- Modal Content goes here -->
+    </div>
+  </div>
+
+  <!-- AUDIO SUCCESS / SFX SYNTH (Fallback Web Audio) -->
+  <script>
+    // Simple Web Audio Sound Effects Generator
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    function playSfx(type) {
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+
+      const now = audioCtx.currentTime;
+      if (type === 'correct') {
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(523.25, now); // C5
+        osc.frequency.setValueAtTime(659.25, now + 0.1); // E5
+        osc.frequency.setValueAtTime(783.99, now + 0.2); // G5
+        osc.frequency.setValueAtTime(1046.50, now + 0.3); // C6
+        gain.gain.setValueAtTime(0.3, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
+        osc.start(now);
+        osc.stop(now + 0.5);
+      } else if (type === 'incorrect') {
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(300, now);
+        osc.frequency.setValueAtTime(220, now + 0.15);
+        gain.gain.setValueAtTime(0.2, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
+        osc.start(now);
+        osc.stop(now + 0.4);
+      } else if (type === 'pop') {
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(400, now);
+        osc.frequency.exponentialRampToValueAtTime(800, now + 0.08);
+        gain.gain.setValueAtTime(0.2, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
+        osc.start(now);
+        osc.stop(now + 0.08);
+      } else if (type === 'win') {
+        // celebratory chime
+        [523.25, 659.25, 783.99, 1046.50, 1318.51].forEach((freq, idx) => {
+          const o = audioCtx.createOscillator();
+          const g = audioCtx.createGain();
+          o.connect(g);
+          g.connect(audioCtx.destination);
+          o.frequency.value = freq;
+          g.gain.setValueAtTime(0.2, now + idx * 0.1);
+          g.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.1 + 0.4);
+          o.start(now + idx * 0.1);
+          o.stop(now + idx * 0.1 + 0.4);
+        });
+      }
+    }
+
+    // Native French Speech Synthesis
+    function speakFrench(text, forcePlay = false) {
+      if (!('speechSynthesis' in window)) {
+        console.warn('Speech synthesis not supported');
+        return;
+      }
+      window.speechSynthesis.cancel(); // Stop any currently playing audio
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'fr-FR';
+      utterance.rate = 0.85; // Slightly slower for 10-year-olds
+      utterance.pitch = 1.05;
+
+      // Try selecting a French voice if present
+      const voices = window.speechSynthesis.getVoices();
+      const frVoice = voices.find(v => v.lang.startsWith('fr') || v.lang.includes('fr_FR') || v.lang.includes('fra'));
+      if (frVoice) {
+        utterance.voice = frVoice;
+      }
+      window.speechSynthesis.speak(utterance);
+    }
+  </script>
+
+  <!-- APP STATE & CURRICULUM DATA -->
+  <script>
+    // LocalStorage State Initializer
+    const STORAGE_KEY = 'petit_francais_v1_data';
+
+    const defaultState = {
+      xp: 40,
+      streak: 1,
+      lastActiveDate: new Date().toISOString().split('T')[0],
+      unlockedLesson: 1,
+      completedLessons: [],
+      quizScores: {}, // lessonId: score %
+      vocabMastered: [],
+      badges: ['first_step'],
+      devModeUnlockAll: false
+    };
+
+    function loadAppState() {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        try {
+          return { ...defaultState, ...JSON.parse(saved) };
+        } catch (e) {
+          return defaultState;
+        }
+      }
+      return defaultState;
+    }
+
+    let state = loadAppState();
+
+    function saveAppState() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      updateNavStats();
+    }
+
+    function updateNavStats() {
+      const xpEl = document.getElementById('nav-xp');
+      const streakEl = document.getElementById('nav-streak');
+      if (xpEl) xpEl.innerText = state.xp;
+      if (streakEl) streakEl.innerText = state.streak;
+    }
+
+    // CURRICULUM DATA DEFINITION
+    // Modular structure: Each lesson holds its vocabulary, interactive activities, listening challenge, speaking challenge, mini-game type, and final quiz.
+    const CURRICULUM = [
+      {
+        id: 1,
+        level: 1,
+        title: "Bonjour!",
+        subtitle: "Greetings & Friendly Hellos",
+        icon: "👋",
+        color: "from-blue-500 to-indigo-600",
+        badge: {
+          id: "badge_l1",
+          name: "Bonjour Champion",
+          icon: "👋",
+          description: "Completed Greetings & Manners!"
+        },
+        vocabulary: [
+          { french: "Bonjour", phonetic: "bon-zhoor", english: "Hello / Good morning", icon: "☀️", hint: "Used during the day!" },
+          { french: "Salut", phonetic: "sah-loo", english: "Hi / Bye (casual)", icon: "🙋‍♂️", hint: "For friends and family!" },
+          { french: "Bonsoir", phonetic: "bon-swahr", english: "Good evening", icon: "🌙", hint: "Used after sunset!" },
+          { french: "Au revoir", phonetic: "oh ruh-vwahr", english: "Goodbye", icon: "👋", hint: "See you next time!" },
+          { french: "Merci", phonetic: "mair-see", english: "Thank you", icon: "🙏", hint: "Always be polite!" },
+          { french: "S'il vous plaît", phonetic: "seel voo pleh", english: "Please", icon: "✨", hint: "Magic words!" },
+          { french: "Oui", phonetic: "wee", english: "Yes", icon: "👍", hint: "Nod your head!" },
+          { french: "Non", phonetic: "nohn", english: "No", icon: "👎", hint: "Shake your head!" }
+        ],
+        practiceActivities: [
+          {
+            type: "choice",
+            question: "What does 'Bonjour' mean in English?",
+            options: ["Goodbye", "Hello", "Thank you", "Please"],
+            answer: 1,
+            helper: "You say this when the sun is shining!"
+          },
+          {
+            type: "match",
+            pairs: [
+              { fr: "Merci", en: "Thank you" },
+              { fr: "Oui", en: "Yes" },
+              { fr: "Au revoir", en: "Goodbye" },
+              { fr: "Salut", en: "Hi / Bye" }
+            ]
+          },
+          {
+            type: "order",
+            sentence: "Bonjour et merci",
+            prompt: "Arrange the words to say: 'Hello and thank you'",
+            words: ["merci", "Bonjour", "et"],
+            correctOrder: ["Bonjour", "et", "merci"]
+          },
+          {
+            type: "fill",
+            sentence: "___, s'il vous plaît !",
+            prompt: "Choose the word to say 'Yes, please!'",
+            options: ["Oui", "Non", "Salut"],
+            answer: 0
+          }
+        ],
+        listening: {
+          audioText: "Bonjour! Au revoir!",
+          question: "What did the friendly French speaker say?",
+          options: ["Good evening! Thank you!", "Hello! Goodbye!", "Yes! Please!", "Hi! No!"],
+          answer: 1
+        },
+        speaking: {
+          target: "Bonjour",
+          prompt: "Say 'Bonjour' with good energy!"
+        },
+        gameType: "match",
+        quiz: [
+          {
+            q: "How do you say 'Thank you' in French?",
+            options: ["Au revoir", "Merci", "Salut", "Bonjour"],
+            ans: 1
+          },
+          {
+            q: "Which word means 'No'?",
+            options: ["Oui", "Non", "Bonsoir", "Merci"],
+            ans: 1
+          },
+          {
+            q: "When someone says 'Salut', they mean:",
+            options: ["Good night", "Hi or Bye", "Thank you very much", "I am hungry"],
+            ans: 1
+          },
+          {
+            q: "What does 'Au revoir' mean?",
+            options: ["Hello", "Goodbye", "Please", "Yes"],
+            ans: 1
+          },
+          {
+            q: "How do you say 'Please' politely in French?",
+            options: ["S'il vous plaît", "Bonjour", "Merci", "Salut"],
+            ans: 0
+          }
+        ]
+      },
+      {
+        id: 2,
+        level: 1,
+        title: "My Name",
+        subtitle: "Je m'appelle & Introducing Yourself",
+        icon: "🏷️",
+        color: "from-emerald-500 to-teal-600",
+        badge: {
+          id: "badge_l2",
+          name: "Intro Star",
+          icon: "🏷️",
+          description: "Mastered introducing yourself!"
+        },
+        vocabulary: [
+          { french: "Je m'appelle", phonetic: "zhuh mah-pell", english: "My name is", icon: "📛", hint: "Literally 'I call myself'!" },
+          { french: "Comment tu t'appelles ?", phonetic: "kom-mahn too tah-pell", english: "What is your name?", icon: "❓", hint: "Asking a friend their name!" },
+          { french: "Enchanté", phonetic: "ahn-shahn-tay", english: "Nice to meet you", icon: "🤝", hint: "When you meet someone new!" },
+          { french: "Moi", phonetic: "mwah", english: "Me / Myself", icon: "🧒", hint: "Pointing to yourself!" },
+          { french: "Toi", phonetic: "twah", english: "You", icon: "👉", hint: "Pointing to a friend!" },
+          { french: "Un ami", phonetic: "uhn ah-mee", english: "A friend (boy)", icon: "👦", hint: "Your buddy!" },
+          { french: "Une amie", phonetic: "oon ah-mee", english: "A friend (girl)", icon: "👧", hint: "Your bestie!" },
+          { french: "Et toi ?", phonetic: "ay twah", english: "And you?", icon: "🔄", hint: "Bouncing the question back!" }
+        ],
+        practiceActivities: [
+          {
+            type: "choice",
+            question: "How do you say 'My name is' in French?",
+            options: ["Comment tu t'appelles", "Je m'appelle", "Au revoir", "Enchanté"],
+            answer: 1,
+            helper: "It starts with 'Je'!"
+          },
+          {
+            type: "order",
+            sentence: "Je m'appelle Leo.",
+            prompt: "Build the sentence: 'My name is Leo.'",
+            words: ["Leo", "m'appelle", "Je"],
+            correctOrder: ["Je", "m'appelle", "Leo"]
+          },
+          {
+            type: "match",
+            pairs: [
+              { fr: "Enchanté", en: "Nice to meet you" },
+              { fr: "Moi", en: "Me" },
+              { fr: "Et toi ?", en: "And you?" },
+              { fr: "Un ami", en: "A friend" }
+            ]
+          },
+          {
+            type: "fill",
+            sentence: "Bonjour, ___ m'appelle Alex.",
+            prompt: "Fill in the missing word for 'I':",
+            options: ["Je", "Toi", "Non"],
+            answer: 0
+          }
+        ],
+        listening: {
+          audioText: "Bonjour! Je m'appelle Emma. Enchanté!",
+          question: "Who is speaking and what did she say?",
+          options: ["She is asking for a friend", "Emma is introducing herself politely", "She is saying goodbye", "She wants a croissant"],
+          answer: 1
+        },
+        speaking: {
+          target: "Je m'appelle",
+          prompt: "Say: 'Je m'appelle'"
+        },
+        gameType: "catcher",
+        quiz: [
+          {
+            q: "Complete: 'Bonjour, je ______ Lucas.'",
+            options: ["m'appelle", "salut", "merci", "ami"],
+            ans: 0
+          },
+          {
+            q: "What does 'Enchanté' mean?",
+            options: ["Goodbye", "Nice to meet you", "See you later", "How are you"],
+            ans: 1
+          },
+          {
+            q: "To ask a classmate their name, you say:",
+            options: ["Comment tu t'appelles ?", "Bonjour merci !", "Au revoir ami !", "S'il vous plaît !"],
+            ans: 0
+          },
+          {
+            q: "'Et toi ?' means:",
+            options: ["And me?", "And you?", "And them?", "Who is it?"],
+            ans: 1
+          },
+          {
+            q: "'Un ami' means:",
+            options: ["A teacher", "A friend", "A dog", "A book"],
+            ans: 1
+          }
+        ]
+      },
+      {
+        id: 3,
+        level: 1,
+        title: "Numbers 1–20",
+        subtitle: "Les Nombres : Count like a Pro!",
+        icon: "🔢",
+        color: "from-amber-500 to-orange-600",
+        badge: {
+          id: "badge_l3",
+          name: "Number Wizard",
+          icon: "🔢",
+          description: "Counted all the way up in French!"
+        },
+        vocabulary: [
+          { french: "Un", phonetic: "uhn", english: "1 (One)", icon: "1️⃣", hint: "Number 1" },
+          { french: "Deux", phonetic: "duh", english: "2 (Two)", icon: "2️⃣", hint: "Number 2" },
+          { french: "Trois", phonetic: "trwah", english: "3 (Three)", icon: "3️⃣", hint: "Number 3" },
+          { french: "Quatre", phonetic: "kaht-ruh", english: "4 (Four)", icon: "4️⃣", hint: "Number 4" },
+          { french: "Cinq", phonetic: "sank", english: "5 (Five)", icon: "5️⃣", hint: "High five!" },
+          { french: "Six", phonetic: "sees", english: "6 (Six)", icon: "6️⃣", hint: "Rhymes with peace!" },
+          { french: "Sept", phonetic: "set", english: "7 (Seven)", icon: "7️⃣", hint: "Lucky 7!" },
+          { french: "Huit", phonetic: "weet", english: "8 (Eight)", icon: "8️⃣", hint: "Number 8" },
+          { french: "Neuf", phonetic: "nuff", english: "9 (Nine)", icon: "9️⃣", hint: "Almost 10!" },
+          { french: "Dix", phonetic: "dees", english: "10 (Ten)", icon: "🔟", hint: "Double digits!" }
+        ],
+        practiceActivities: [
+          {
+            type: "choice",
+            question: "What number is 'Trois'?",
+            options: ["1", "2", "3", "5"],
+            answer: 2,
+            helper: "Count: Un, Deux, Trois..."
+          },
+          {
+            type: "match",
+            pairs: [
+              { fr: "Un", en: "1" },
+              { fr: "Cinq", en: "5" },
+              { fr: "Sept", en: "7" },
+              { fr: "Dix", en: "10" }
+            ]
+          },
+          {
+            type: "order",
+            sentence: "Un deux trois",
+            prompt: "Order numbers: 1, 2, 3",
+            words: ["trois", "un", "deux"],
+            correctOrder: ["un", "deux", "trois"]
+          },
+          {
+            type: "choice",
+            question: "What is 'Deux + Trois' in French?",
+            options: ["Quatre (4)", "Cinq (5)", "Six (6)", "Sept (7)"],
+            answer: 1,
+            helper: "2 + 3 = 5"
+          }
+        ],
+        listening: {
+          audioText: "Un, deux, trois, quatre, cinq!",
+          question: "How many numbers were counted?",
+          options: ["Up to 3", "Up to 5", "Up to 10", "Only number 1"],
+          answer: 1
+        },
+        speaking: {
+          target: "Un deux trois",
+          prompt: "Say: 'Un, deux, trois'"
+        },
+        gameType: "match",
+        quiz: [
+          {
+            q: "Which French word represents the number 8?",
+            options: ["Huit", "Sept", "Neuf", "Deux"],
+            ans: 0
+          },
+          {
+            q: "What number comes after 'Quatre' (4)?",
+            options: ["Trois", "Cinq", "Dix", "Six"],
+            ans: 1
+          },
+          {
+            q: "'Dix' is equal to:",
+            options: ["5", "7", "10", "1"],
+            ans: 2
+          },
+          {
+            q: "Which word means 'Zero' in French?",
+            options: ["Zéro", "Huit", "Un", "Non"],
+            ans: 0
+          },
+          {
+            q: "How do you say 7 in French?",
+            options: ["Sept", "Six", "Deux", "Neuf"],
+            ans: 0
+          }
+        ]
+      },
+      {
+        id: 4,
+        level: 1,
+        title: "Colors",
+        subtitle: "Les Couleurs : Paint the World! 🌈",
+        icon: "🎨",
+        color: "from-pink-500 to-rose-600",
+        badge: {
+          id: "badge_l4",
+          name: "Rainbow Artist",
+          icon: "🌈",
+          description: "Learned all the vibrant French colors!"
+        },
+        vocabulary: [
+          { french: "Rouge", phonetic: "roozh", english: "Red", icon: "🔴", hint: "Like a sweet strawberry!" },
+          { french: "Bleu", phonetic: "bluh", english: "Blue", icon: "🔵", hint: "Like the clear sky!" },
+          { french: "Jaune", phonetic: "zhohn", english: "Yellow", icon: "🟡", hint: "Like the bright sun!" },
+          { french: "Vert", phonetic: "vair", english: "Green", icon: "🟢", hint: "Like fresh grass!" },
+          { french: "Orange", phonetic: "oh-rahnzh", english: "Orange", icon: "🟠", hint: "Same as the fruit!" },
+          { french: "Rose", phonetic: "rohz", english: "Pink", icon: "🌸", hint: "Like a pretty flower!" },
+          { french: "Noir", phonetic: "nwahr", english: "Black", icon: "⚫", hint: "Like the night sky!" },
+          { french: "Blanc", phonetic: "blahn", english: "White", icon: "⚪", hint: "Like fluffy snow!" }
+        ],
+        practiceActivities: [
+          {
+            type: "choice",
+            question: "Which color is 'Bleu'?",
+            options: ["Red", "Yellow", "Blue", "Green"],
+            answer: 2,
+            helper: "Think of water or the sky!"
+          },
+          {
+            type: "match",
+            pairs: [
+              { fr: "Rouge", en: "Red" },
+              { fr: "Vert", en: "Green" },
+              { fr: "Jaune", en: "Yellow" },
+              { fr: "Rose", en: "Pink" }
+            ]
+          },
+          {
+            type: "fill",
+            sentence: "Le soleil est ___ (The sun is yellow).",
+            prompt: "Select the French color for 'Yellow':",
+            options: ["jaune", "noir", "bleu"],
+            answer: 0
+          },
+          {
+            type: "order",
+            sentence: "Bleu blanc rouge",
+            prompt: "The 3 colors of the French flag: Blue, White, Red",
+            words: ["rouge", "blanc", "Bleu"],
+            correctOrder: ["Bleu", "blanc", "rouge"]
+          }
+        ],
+        listening: {
+          audioText: "Le ciel est bleu et le soleil est jaune.",
+          question: "Which two colors did you hear in French?",
+          options: ["Rouge et Vert", "Bleu et Jaune", "Noir et Blanc", "Rose et Orange"],
+          answer: 1
+        },
+        speaking: {
+          target: "Bleu blanc rouge",
+          prompt: "Say the colors of the French flag: 'Bleu, blanc, rouge'"
+        },
+        gameType: "catcher",
+        quiz: [
+          {
+            q: "What color is an apple (la pomme) usually?",
+            options: ["Rouge", "Bleu", "Noir", "Gris"],
+            ans: 0
+          },
+          {
+            q: "'Vert' means:",
+            options: ["Green", "Purple", "Pink", "Yellow"],
+            ans: 0
+          },
+          {
+            q: "What color is snow (la neige)?",
+            options: ["Noir", "Blanc", "Rouge", "Vert"],
+            ans: 1
+          },
+          {
+            q: "Which word means Pink?",
+            options: ["Rose", "Bleu", "Jaune", "Orange"],
+            ans: 0
+          },
+          {
+            q: "The color of the night is:",
+            options: ["Noir", "Blanc", "Rose", "Jaune"],
+            ans: 0
+          }
+        ]
+      },
+      {
+        id: 5,
+        level: 1,
+        title: "My Family",
+        subtitle: "La Famille : People we love 👨‍👩‍👧",
+        icon: "👨‍👩‍👧",
+        color: "from-purple-500 to-indigo-600",
+        badge: {
+          id: "badge_l5",
+          name: "Family Hero",
+          icon: "👨‍👩‍👧",
+          description: "Described all family members in French!"
+        },
+        vocabulary: [
+          { french: "La famille", phonetic: "lah fah-meel-yuh", english: "The family", icon: "🏡", hint: "Everyone together!" },
+          { french: "La mère / Maman", phonetic: "lah mair / mah-mahn", english: "Mother / Mom", icon: "👩", hint: "Mom!" },
+          { french: "Le père / Papa", phonetic: "luh pair / pah-pah", english: "Father / Dad", icon: "👨", hint: "Dad!" },
+          { french: "Le frère", phonetic: "luh frair", english: "Brother", icon: "👦", hint: "Your brother!" },
+          { french: "La sœur", phonetic: "lah sir", english: "Sister", icon: "👧", hint: "Your sister!" },
+          { french: "Le grand-père / Papy", phonetic: "luh grahn-pair", english: "Grandfather / Grandpa", icon: "👴", hint: "Grandpa!" },
+          { french: "La grand-mère / Mamie", phonetic: "lah grahn-mair", english: "Grandmother / Grandma", icon: "👵", hint: "Grandma!" },
+          { french: "Le bébé", phonetic: "luh bay-bay", english: "The baby", icon: "👶", hint: "Cute little one!" }
+        ],
+        practiceActivities: [
+          {
+            type: "choice",
+            question: "How do you say 'Brother' in French?",
+            options: ["Le frère", "La sœur", "Le père", "La mère"],
+            answer: 0,
+            helper: "Sounds a bit like 'friar'!"
+          },
+          {
+            type: "match",
+            pairs: [
+              { fr: "Papa", en: "Dad" },
+              { fr: "Maman", en: "Mom" },
+              { fr: "La sœur", en: "Sister" },
+              { fr: "Le bébé", en: "Baby" }
+            ]
+          },
+          {
+            type: "order",
+            sentence: "J'aime ma famille",
+            prompt: "Build sentence: 'I love my family'",
+            words: ["famille", "J'aime", "ma"],
+            correctOrder: ["J'aime", "ma", "famille"]
+          },
+          {
+            type: "fill",
+            sentence: "Ma ___ est gentille (My mom is kind).",
+            prompt: "Choose the word for Mother:",
+            options: ["mère", "père", "frère"],
+            answer: 0
+          }
+        ],
+        listening: {
+          audioText: "Voici mon père, ma mère et mon frère.",
+          question: "Who was introduced in this sentence?",
+          options: ["Grandma and Grandpa", "Father, Mother, and Brother", "Sister and Baby", "Only a friend"],
+          answer: 1
+        },
+        speaking: {
+          target: "J'aime ma famille",
+          prompt: "Say: 'J'aime ma famille' (I love my family)"
+        },
+        gameType: "match",
+        quiz: [
+          {
+            q: "'La sœur' translates to:",
+            options: ["The sister", "The brother", "The mom", "The aunt"],
+            ans: 0
+          },
+          {
+            q: "How do kids affectionately call their grandma in French?",
+            options: ["Mamie", "Papy", "Papa", "Frère"],
+            ans: 0
+          },
+          {
+            q: "'Le père' means:",
+            options: ["The mother", "The father", "The baby", "The sister"],
+            ans: 1
+          },
+          {
+            q: "Complete: 'Voici mon petit ______' (This is my little baby)",
+            options: ["bébé", "maman", "grand-mère", "couleur"],
+            ans: 0
+          },
+          {
+            q: "How do you say 'I love my family'?",
+            options: ["J'aime ma famille", "Au revoir famille", "Bonjour bébé", "Merci papa"],
+            ans: 0
+          }
+        ]
+      },
+      // Upcoming roadmap placeholders for Level 1, 2, 3
+      { id: 6, level: 1, title: "Age (J'ai dix ans)", subtitle: "Talking about how old you are", icon: "🎂", locked: true },
+      { id: 7, level: 1, title: "School", subtitle: "My school day & backpack", icon: "🎒", locked: true },
+      { id: 8, level: 1, title: "Classroom Objects", subtitle: "Pencils, books & rulers", icon: "✏️", locked: true },
+      { id: 9, level: 1, title: "Days of the Week", subtitle: "Lundi, Mardi, Mercredi...", icon: "📅", locked: true },
+      { id: 10, level: 1, title: "Months & Birthday", subtitle: "Months of the year", icon: "🎁", locked: true },
+      { id: 11, level: 2, title: "Yummy Food", subtitle: "Fruits, bread & cheese", icon: "🍎", locked: true },
+      { id: 12, level: 2, title: "Refreshing Drinks", subtitle: "Water, milk & juice", icon: "🧃", locked: true },
+      { id: 13, level: 2, title: "Cute Animals", subtitle: "Dogs, cats & birds", icon: "🐶", locked: true },
+      { id: 14, level: 2, title: "Body Parts", subtitle: "Head, shoulders, knees & toes", icon: "👀", locked: true },
+      { id: 15, level: 2, title: "Cool Clothes", subtitle: "Shirts, hats & shoes", icon: "👕", locked: true }
+    ];
+
+    // All available badges
+    const ALL_BADGES = [
+      { id: "first_step", name: "First Steps", icon: "🚀", desc: "Started your French adventure!" },
+      { id: "badge_l1", name: "Bonjour Champion", icon: "👋", desc: "Mastered Greetings & Manners" },
+      { id: "badge_l2", name: "Intro Star", icon: "🏷️", desc: "Learned to introduce yourself" },
+      { id: "badge_l3", name: "Number Wizard", icon: "🔢", desc: "Counted up in French" },
+      { id: "badge_l4", name: "Rainbow Artist", icon: "🌈", desc: "Mastered all French colors" },
+      { id: "badge_l5", name: "Family Hero", icon: "👨‍👩‍👧", desc: "Described your whole family" },
+      { id: "perfect_quiz", name: "100% Perfection", icon: "⭐", desc: "Scored 100% on a lesson quiz" },
+      { id: "game_master", name: "Game Champion", icon: "🕹️", desc: "Won a vocabulary mini-game" }
+    ];
+
+    // Add XP helper with celebratory animations
+    function awardXP(amount, reason = "") {
+      state.xp += amount;
+      saveAppState();
+      showToast(`+${amount} XP! ${reason} ⭐`, "purple");
+    }
+
+    function unlockBadge(badgeId) {
+      if (!state.badges.includes(badgeId)) {
+        state.badges.push(badgeId);
+        saveAppState();
+        const badgeObj = ALL_BADGES.find(b => b.id === badgeId);
+        if (badgeObj) {
+          playSfx('win');
+          confetti({ particleCount: 80, spread: 70, origin: { y: 0.6 } });
+          showToast(`🏆 Badge Unlocked: ${badgeObj.name}!`, "green");
+        }
+      }
+    }
+
+    function showToast(msg, type = "blue") {
+      const toast = document.createElement('div');
+      toast.className = `fixed top-20 right-4 z-50 px-5 py-3 rounded-2xl shadow-xl border-2 font-bold text-sm animate-pop-in flex items-center gap-2 bg-white text-slate-800 border-yellow-400`;
+      toast.innerHTML = `<span>${msg}</span>`;
+      document.body.appendChild(toast);
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transition = 'opacity 0.4s ease';
+        setTimeout(() => toast.remove(), 400);
+      }, 2600);
+    }
+  </script>
+
+  <!-- ROUTING AND VIEW RENDERING ENGINE -->
+  <script>
+    let currentView = 'home';
+    let currentLessonSession = null; // Active lesson runner state
+
+    function navigate(viewName, params = {}) {
+      currentView = viewName;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+
+      // Update Nav Tabs Active State
+      document.querySelectorAll('.nav-tab').forEach(btn => {
+        btn.classList.remove('text-frenchBlue');
+        btn.classList.add('text-slate-400');
+        const iconDiv = btn.querySelector('div');
+        if (iconDiv) {
+          iconDiv.classList.remove('bg-blue-100');
+          iconDiv.classList.add('bg-slate-100');
+        }
+      });
+
+      const activeTab = document.getElementById(`tab-${viewName}`);
+      if (activeTab) {
+        activeTab.classList.remove('text-slate-400');
+        activeTab.classList.add('text-frenchBlue');
+        const iconDiv = activeTab.querySelector('div');
+        if (iconDiv) {
+          iconDiv.classList.remove('bg-slate-100');
+          iconDiv.classList.add('bg-blue-100');
+        }
+      }
+
+      const viewport = document.getElementById('app-viewport');
+      switch (viewName) {
+        case 'home':
+          renderHome(viewport);
+          break;
+        case 'map':
+          renderLessonMap(viewport);
+          break;
+        case 'vocab':
+          renderVocabBank(viewport);
+          break;
+        case 'games':
+          renderGamesHub(viewport);
+          break;
+        case 'badges':
+          renderBadges(viewport);
+          break;
+        case 'lesson':
+          startLesson(params.lessonId);
+          break;
+        default:
+          renderHome(viewport);
+      }
+    }
+
+    // ==========================================
+    // 1. HOME SCREEN VIEW
+    // ==========================================
+    function renderHome(container) {
+      const currentLesson = CURRICULUM.find(l => l.id === state.unlockedLesson) || CURRICULUM[0];
+      const completedCount = state.completedLessons.length;
+      const progressPercent = Math.min(100, Math.round((completedCount / 5) * 100));
+
+      container.innerHTML = `
+        <div class="space-y-6 animate-pop-in">
+          
+          <!-- WELCOME BANNER -->
+          <div class="bg-gradient-to-r from-blue-600 via-indigo-600 to-frenchBlue rounded-3xl p-6 sm:p-8 text-white shadow-xl relative overflow-hidden">
+            <!-- Decorative circle shapes -->
+            <div class="absolute -right-10 -bottom-10 w-44 h-44 bg-white/10 rounded-full blur-2xl pointer-events-none"></div>
+            <div class="absolute right-6 top-4 text-7xl opacity-20 hidden sm:block">🗼</div>
+
+            <div class="relative z-10 max-w-xl">
+              <div class="inline-flex items-center gap-2 bg-white/20 backdrop-blur-md px-3.5 py-1 rounded-full text-xs font-extrabold uppercase tracking-wide mb-3">
+                <span>🇫🇷 Bonjour Explorer!</span>
+              </div>
+              <h2 class="heading-font text-3xl sm:text-4xl font-bold mb-2">Welcome Back, Champion! 👋</h2>
+              <p class="text-blue-100 font-medium text-sm sm:text-base mb-6">
+                Ready for some fun French? Learn words, play games, and earn awesome shiny stars!
+              </p>
+
+              <!-- Progress Bar -->
+              <div class="bg-blue-950/40 p-4 rounded-2xl border border-blue-400/30">
+                <div class="flex justify-between items-center text-xs font-bold mb-1.5">
+                  <span class="text-blue-200">Level 1 Beginner Progress</span>
+                  <span class="text-yellow-300">${progressPercent}% Completed</span>
+                </div>
+                <div class="w-full bg-blue-900/60 rounded-full h-3.5 overflow-hidden p-0.5 border border-blue-400/40">
+                  <div class="bg-gradient-to-r from-amber-400 to-yellow-300 h-full rounded-full transition-all duration-700" style="width: ${progressPercent}%"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- CURRENT LESSON HERO CARD -->
+          <div class="bg-white rounded-3xl p-6 shadow-md border-4 border-blue-100 flex flex-col md:flex-row items-center justify-between gap-6 game-card">
+            <div class="flex items-center gap-4 text-left w-full md:w-auto">
+              <div class="w-16 h-16 rounded-2xl bg-gradient-to-br ${currentLesson.color || 'from-blue-500 to-indigo-500'} flex items-center justify-center text-3xl text-white shadow-md shadow-blue-200">
+                ${currentLesson.icon}
+              </div>
+              <div>
+                <span class="text-xs font-extrabold text-frenchBlue bg-blue-50 px-2.5 py-1 rounded-lg uppercase tracking-wide">
+                  Up Next • Lesson ${currentLesson.id}
+                </span>
+                <h3 class="heading-font text-2xl font-bold text-slate-800 mt-1">${currentLesson.title}</h3>
+                <p class="text-xs sm:text-sm font-semibold text-slate-400">${currentLesson.subtitle}</p>
+              </div>
+            </div>
+
+            <button onclick="navigate('lesson', { lessonId: ${currentLesson.id} })" class="w-full md:w-auto bg-gradient-to-r from-frenchBlue to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold text-lg px-8 py-4 rounded-2xl shadow-lg shadow-blue-500/30 flex items-center justify-center gap-3 transition active:scale-95 group">
+              <span>Continue Lesson</span>
+              <i class="fa-solid fa-play text-yellow-300 group-hover:translate-x-1 transition"></i>
+            </button>
+          </div>
+
+          <!-- 3 QUICK ACTION SHORTCUT TILES -->
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <!-- Map Card -->
+            <div onclick="navigate('map')" class="bg-white p-5 rounded-3xl border-3 border-amber-100 shadow-sm hover:shadow-md cursor-pointer game-card border-2 border-amber-200 flex items-center gap-4">
+              <div class="w-12 h-12 rounded-2xl bg-amber-100 text-amber-600 flex items-center justify-center text-2xl">
+                🗺️
+              </div>
+              <div>
+                <h4 class="heading-font font-bold text-slate-800">Lesson Map</h4>
+                <p class="text-xs text-slate-400 font-semibold">View all 30 stages</p>
+              </div>
+            </div>
+
+            <!-- Games Card -->
+            <div onclick="navigate('games')" class="bg-white p-5 rounded-3xl border-3 border-pink-100 shadow-sm hover:shadow-md cursor-pointer game-card border-2 border-pink-200 flex items-center gap-4">
+              <div class="w-12 h-12 rounded-2xl bg-pink-100 text-pink-600 flex items-center justify-center text-2xl">
+                🎮
+              </div>
+              <div>
+                <h4 class="heading-font font-bold text-slate-800">Mini Games</h4>
+                <p class="text-xs text-slate-400 font-semibold">Match & Catch Words</p>
+              </div>
+            </div>
+
+            <!-- Badges Card -->
+            <div onclick="navigate('badges')" class="bg-white p-5 rounded-3xl border-3 border-purple-100 shadow-sm hover:shadow-md cursor-pointer game-card border-2 border-purple-200 flex items-center gap-4">
+              <div class="w-12 h-12 rounded-2xl bg-purple-100 text-purple-600 flex items-center justify-center text-2xl">
+                🏆
+              </div>
+              <div>
+                <h4 class="heading-font font-bold text-slate-800">My Badges</h4>
+                <p class="text-xs text-slate-400 font-semibold">${state.badges.length} trophies unlocked</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- WORD OF THE DAY QUICK SNACK -->
+          <div class="bg-amber-50 rounded-3xl p-5 border-2 border-amber-200 flex items-center justify-between">
+            <div class="flex items-center gap-4">
+              <div class="w-12 h-12 rounded-2xl bg-amber-400 text-white flex items-center justify-center text-2xl shadow-sm">
+                🥖
+              </div>
+              <div>
+                <span class="text-xs font-bold text-amber-700 uppercase tracking-wider">Word of the Day</span>
+                <div class="flex items-center gap-2">
+                  <h4 class="heading-font text-xl font-bold text-slate-800">La baguette</h4>
+                  <button onclick="speakFrench('La baguette')" class="text-amber-600 hover:text-amber-800 text-base">
+                    <i class="fa-solid fa-volume-high"></i>
+                  </button>
+                </div>
+                <p class="text-xs font-semibold text-slate-500">Traditional French bread [lah bah-get]</p>
+              </div>
+            </div>
+            <button onclick="awardXP(5, 'Word snack bonus'); speakFrench('La baguette');" class="bg-amber-400 hover:bg-amber-500 text-amber-950 text-xs font-extrabold px-3.5 py-2 rounded-xl shadow-sm transition">
+              +5 XP Listen
+            </button>
+          </div>
+
+        </div>
+      `;
+    }
+
+    // ==========================================
+    // 2. LESSON MAP VIEW
+    // ==========================================
+    function renderLessonMap(container) {
+      let html = `
+        <div class="space-y-6 animate-pop-in">
+          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+            <div>
+              <h2 class="heading-font text-3xl font-bold text-slate-800">Your French Journey 🗺️</h2>
+              <p class="text-slate-500 text-sm font-semibold">Follow the trail, finish activities, and collect golden stars!</p>
+            </div>
+            <!-- Developer Unlock Toggle -->
+            <button onclick="toggleDevUnlock()" class="text-xs bg-slate-200 hover:bg-slate-300 text-slate-700 px-3 py-1.5 rounded-xl font-bold transition flex items-center gap-1.5">
+              <i class="fa-solid ${state.devModeUnlockAll ? 'fa-lock-open text-emerald-600' : 'fa-lock'}"></i>
+              <span>${state.devModeUnlockAll ? 'All Lessons Unlocked (Dev Mode)' : 'Dev: Unlock All'}</span>
+            </button>
+          </div>
+
+          <!-- LEVEL 1 SECTION -->
+          <div class="bg-white rounded-3xl p-6 shadow-sm border-2 border-blue-100">
+            <div class="flex items-center gap-3 mb-6">
+              <span class="bg-blue-600 text-white font-extrabold text-xs px-3 py-1 rounded-full uppercase tracking-wider">Level 1</span>
+              <h3 class="heading-font text-xl font-bold text-slate-800">My First French Words</h3>
+            </div>
+
+            <div class="space-y-4">
+      `;
+
+      CURRICULUM.forEach((lesson, index) => {
+        const isCompleted = state.completedLessons.includes(lesson.id);
+        const isUnlocked = state.devModeUnlockAll || isCompleted || lesson.id <= state.unlockedLesson;
+        const isCurrent = lesson.id === state.unlockedLesson && !isCompleted;
+        const isPlayable = lesson.id <= 5; // First 5 are fully implemented
+
+        html += `
+          <div class="relative flex items-center gap-4 p-4 rounded-2xl border-2 transition-all ${
+            isCurrent
+              ? 'border-blue-400 bg-blue-50/70 shadow-md ring-4 ring-blue-100'
+              : isCompleted
+              ? 'border-emerald-200 bg-emerald-50/40'
+              : isUnlocked
+              ? 'border-slate-200 bg-white'
+              : 'border-slate-100 bg-slate-50 opacity-60'
+          }">
+            
+            <!-- Step Badge Number / Status -->
+            <div class="w-14 h-14 rounded-2xl flex-shrink-0 flex items-center justify-center text-2xl font-bold ${
+              isCompleted
+                ? 'bg-emerald-500 text-white shadow-md'
+                : isCurrent
+                ? 'bg-blue-600 text-white shadow-md shadow-blue-300 animate-pulse-border'
+                : isUnlocked
+                ? 'bg-slate-200 text-slate-700'
+                : 'bg-slate-200 text-slate-400'
+            }">
+              ${isCompleted ? '✓' : lesson.icon}
+            </div>
+
+            <!-- Info -->
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center gap-2">
+                <span class="text-xs font-bold text-slate-400">Lesson ${lesson.id}</span>
+                ${isCompleted ? '<span class="text-xs bg-emerald-100 text-emerald-700 font-extrabold px-2 py-0.5 rounded-full">✅ Completed</span>' : ''}
+                ${isCurrent ? '<span class="text-xs bg-blue-100 text-blue-700 font-extrabold px-2 py-0.5 rounded-full animate-pulse">⭐ Up Next</span>' : ''}
+                ${!isPlayable ? '<span class="text-xs bg-amber-100 text-amber-700 font-extrabold px-2 py-0.5 rounded-full">🚧 Level Coming Soon</span>' : ''}
+              </div>
+              <h4 class="heading-font text-lg font-bold text-slate-800 truncate">${lesson.title}</h4>
+              <p class="text-xs font-semibold text-slate-500 truncate">${lesson.subtitle}</p>
+            </div>
+
+            <!-- Action Button -->
+            <div>
+              ${
+                isPlayable && isUnlocked
+                  ? `<button onclick="navigate('lesson', { lessonId: ${lesson.id} })" class="px-5 py-2.5 rounded-xl font-extrabold text-sm shadow-sm transition ${
+                      isCompleted
+                        ? 'bg-emerald-100 text-emerald-800 hover:bg-emerald-200'
+                        : 'bg-blue-600 text-white hover:bg-blue-700 shadow-blue-200'
+                    }">
+                      ${isCompleted ? 'Review' : 'Start'}
+                    </button>`
+                  : `<div class="p-3 text-slate-400 text-lg">
+                      <i class="fa-solid fa-lock"></i>
+                    </div>`
+              }
+            </div>
+
+          </div>
+        `;
+      });
+
+      html += `
+            </div>
+          </div>
+        </div>
+      `;
+      container.innerHTML = html;
+    }
+
+    function toggleDevUnlock() {
+      state.devModeUnlockAll = !state.devModeUnlockAll;
+      saveAppState();
+      renderLessonMap(document.getElementById('app-viewport'));
+      showToast(state.devModeUnlockAll ? "Developer Mode: All Lessons Unlocked" : "Lessons Reset to Normal", "blue");
+    }
+
+    // ==========================================
+    // 3. VOCABULARY BANK VIEW
+    // ==========================================
+    function renderVocabBank(container) {
+      // Gather all vocab from available lessons
+      const allWords = [];
+      CURRICULUM.filter(l => l.vocabulary).forEach(l => {
+        l.vocabulary.forEach(v => allWords.push({ ...v, lessonTitle: l.title }));
+      });
+
+      let html = `
+        <div class="space-y-6 animate-pop-in">
+          <div>
+            <h2 class="heading-font text-3xl font-bold text-slate-800">Vocabulary Flashcards 📚</h2>
+            <p class="text-slate-500 text-sm font-semibold">Listen, repeat, and remember your favourite French words!</p>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+      `;
+
+      allWords.forEach((word) => {
+        html += `
+          <div class="bg-white rounded-3xl p-5 border-2 border-blue-100 shadow-sm hover:shadow-md transition game-card flex flex-col justify-between">
+            <div class="flex items-start justify-between">
+              <span class="text-4xl p-2 bg-blue-50 rounded-2xl">${word.icon || '💬'}</span>
+              <button onclick="speakFrench('${word.french}')" class="w-10 h-10 rounded-2xl bg-blue-100 hover:bg-blue-200 text-frenchBlue flex items-center justify-center transition">
+                <i class="fa-solid fa-volume-high text-lg"></i>
+              </button>
+            </div>
+            <div class="mt-4">
+              <h3 class="heading-font text-2xl font-bold text-slate-800">${word.french}</h3>
+              <p class="text-xs font-bold text-blue-500 tracking-wide mb-1">/${word.phonetic}/</p>
+              <p class="text-sm font-bold text-slate-600">${word.english}</p>
+            </div>
+            <div class="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-400 font-semibold">
+              <span>${word.lessonTitle}</span>
+              <span class="text-amber-500 font-bold">⭐ Tap to listen</span>
+            </div>
+          </div>
+        `;
+      });
+
+      html += `
+          </div>
+        </div>
+      `;
+      container.innerHTML = html;
+    }
+
+    // ==========================================
+    // 4. MINI-GAMES HUB VIEW
+    // ==========================================
+    function renderGamesHub(container) {
+      container.innerHTML = `
+        <div class="space-y-6 animate-pop-in">
+          <div>
+            <h2 class="heading-font text-3xl font-bold text-slate-800">French Game Arcade 🎮</h2>
+            <p class="text-slate-500 text-sm font-semibold">Practice words while having super fun and earning bonus XP!</p>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            
+            <!-- Game 1: Memory Match -->
+            <div class="bg-gradient-to-br from-indigo-500 to-purple-600 rounded-3xl p-6 text-white shadow-xl flex flex-col justify-between relative overflow-hidden">
+              <div class="relative z-10">
+                <div class="w-14 h-14 bg-white/20 rounded-2xl flex items-center justify-center text-3xl mb-4">
+                  🃏
+                </div>
+                <h3 class="heading-font text-2xl font-bold mb-1">Memory Match Card Flip</h3>
+                <p class="text-indigo-100 text-sm font-medium mb-6">
+                  Flip tiles to pair French words with their English translations. Test your quick memory!
+                </p>
+              </div>
+              <button onclick="startStandaloneMemoryGame()" class="relative z-10 w-full bg-white text-indigo-700 font-extrabold py-3.5 rounded-2xl shadow-md hover:bg-indigo-50 transition active:scale-95 flex items-center justify-center gap-2">
+                <i class="fa-solid fa-play"></i> Play Memory Match
+              </button>
+            </div>
+
+            <!-- Game 2: Word Bubble Catcher -->
+            <div class="bg-gradient-to-br from-pink-500 to-rose-600 rounded-3xl p-6 text-white shadow-xl flex flex-col justify-between relative overflow-hidden">
+              <div class="relative z-10">
+                <div class="w-14 h-14 bg-white/20 rounded-2xl flex items-center justify-center text-3xl mb-4">
+                  🎈
+                </div>
+                <h3 class="heading-font text-2xl font-bold mb-1">Fast Word Catch</h3>
+                <p class="text-pink-100 text-sm font-medium mb-6">
+                  Tap the falling bubbles matching the French audio before they touch the ground!
+                </p>
+              </div>
+              <button onclick="startStandaloneCatcherGame()" class="relative z-10 w-full bg-white text-pink-700 font-extrabold py-3.5 rounded-2xl shadow-md hover:bg-pink-50 transition active:scale-95 flex items-center justify-center gap-2">
+                <i class="fa-solid fa-play"></i> Play Word Catcher
+              </button>
+            </div>
+
+          </div>
+
+          <div id="game-active-arena" class="mt-6"></div>
+        </div>
+      `;
+    }
+
+    // ==========================================
+    // 5. BADGES & ACHIEVEMENTS VIEW
+    // ==========================================
+    function renderBadges(container) {
+      let html = `
+        <div class="space-y-6 animate-pop-in">
+          <div>
+            <h2 class="heading-font text-3xl font-bold text-slate-800">Your Trophy Showcase 🏆</h2>
+            <p class="text-slate-500 text-sm font-semibold">Collect badges as you learn words, finish lessons, and ace quizzes!</p>
+          </div>
+
+          <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+      `;
+
+      ALL_BADGES.forEach(badge => {
+        const isUnlocked = state.badges.includes(badge.id);
+        html += `
+          <div class="bg-white rounded-3xl p-5 border-2 ${
+            isUnlocked ? 'border-amber-300 shadow-md bg-amber-50/20' : 'border-slate-100 opacity-60 bg-slate-50'
+          } flex flex-col items-center text-center justify-between">
+            <div class="w-20 h-20 rounded-3xl ${
+              isUnlocked ? 'bg-gradient-to-tr from-yellow-300 to-amber-500 shadow-md shadow-amber-200 text-white' : 'bg-slate-200 text-slate-400'
+            } flex items-center justify-center text-4xl mb-3 ${isUnlocked ? 'animate-bounce-slow' : ''}">
+              ${isUnlocked ? badge.icon : '🔒'}
+            </div>
+            <div>
+              <h4 class="heading-font font-bold text-slate-800 text-base">${badge.name}</h4>
+              <p class="text-xs font-semibold text-slate-400 mt-1">${badge.desc}</p>
+            </div>
+            <div class="mt-3">
+              ${
+                isUnlocked
+                  ? '<span class="text-[11px] font-extrabold bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full">Unlocked ✨</span>'
+                  : '<span class="text-[11px] font-bold text-slate-400">Locked</span>'
+              }
+            </div>
+          </div>
+        `;
+      });
+
+      html += `
+          </div>
+        </div>
+      `;
+      container.innerHTML = html;
+    }
+  </script>
+
+  <!-- LESSON ENGINE (7-STEP MODULAR RUNNER) -->
+  <script>
+    // LESSON RUNNER STATE MACHINE
+    // Steps: 0: Learn, 1: Repeat, 2: Practice, 3: Listening, 4: Speaking, 5: Mini-Game, 6: Mini-Quiz, 7: Celebration
+    const LESSON_STEPS = [
+      { name: "Learn", icon: "📖" },
+      { name: "Repeat", icon: "🗣️" },
+      { name: "Practice", icon: "✍️" },
+      { name: "Listen", icon: "🎧" },
+      { name: "Speak", icon: "🎤" },
+      { name: "Game", icon: "🎮" },
+      { name: "Quiz", icon: "⭐" }
+    ];
+
+    function startLesson(lessonId) {
+      const lesson = CURRICULUM.find(l => l.id === Number(lessonId));
+      if (!lesson) {
+        showToast("Lesson not found!", "red");
+        navigate('map');
+        return;
+      }
+
+      currentLessonSession = {
+        lesson: lesson,
+        stepIndex: 0,
+        subStep: 0,
+        quizScore: 0,
+        quizAnswers: []
+      };
+
+      renderLessonFrame();
+    }
+
+    function renderLessonFrame() {
+      const viewport = document.getElementById('app-viewport');
+      const session = currentLessonSession;
+      if (!session) return;
+
+      const currentStep = LESSON_STEPS[session.stepIndex];
+
+      viewport.innerHTML = `
+        <div class="max-w-3xl mx-auto space-y-4 animate-pop-in">
+          
+          <!-- TOP STEP HEADER & PROGRESS BAR -->
+          <div class="bg-white rounded-3xl p-4 shadow-sm border-2 border-blue-100 flex items-center justify-between gap-4">
+            <button onclick="confirmExitLesson()" class="w-10 h-10 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center font-bold text-lg transition">
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+
+            <!-- 7-Step Dots -->
+            <div class="flex-1 flex items-center justify-between gap-1 max-w-md">
+              ${LESSON_STEPS.map((st, idx) => `
+                <div class="flex-1 h-3 rounded-full transition-all duration-300 ${
+                  idx < session.stepIndex
+                    ? 'bg-emerald-500'
+                    : idx === session.stepIndex
+                    ? 'bg-frenchBlue ring-2 ring-blue-300'
+                    : 'bg-slate-200'
+                }"></div>
+              `).join('')}
+            </div>
+
+            <!-- Current Step Icon -->
+            <div class="flex items-center gap-1.5 text-xs font-bold text-frenchBlue bg-blue-50 px-3 py-1.5 rounded-2xl">
+              <span>${currentStep.icon}</span>
+              <span class="hidden sm:inline">${currentStep.name}</span>
+            </div>
+          </div>
+
+          <!-- DYNAMIC STEP BODY -->
+          <div id="lesson-step-content" class="bg-white rounded-3xl p-6 sm:p-8 shadow-md border-3 border-blue-100 min-h-[420px] flex flex-col justify-between">
+            <!-- Step content dynamically injected here -->
+          </div>
+
+        </div>
+      `;
+
+      renderStepContent();
+    }
+
+    function renderStepContent() {
+      const contentEl = document.getElementById('lesson-step-content');
+      if (!contentEl) return;
+      const session = currentLessonSession;
+      const lesson = session.lesson;
+
+      switch (session.stepIndex) {
+        case 0:
+          renderStep1Learn(contentEl, lesson);
+          break;
+        case 1:
+          renderStep2Repeat(contentEl, lesson);
+          break;
+        case 2:
+          renderStep3Practice(contentEl, lesson);
+          break;
+        case 3:
+          renderStep4Listening(contentEl, lesson);
+          break;
+        case 4:
+          renderStep5Speaking(contentEl, lesson);
+          break;
+        case 5:
+          renderStep6MiniGame(contentEl, lesson);
+          break;
+        case 6:
+          renderStep7MiniQuiz(contentEl, lesson);
+          break;
+        case 7:
+          renderLessonCelebration(contentEl, lesson);
+          break;
+      }
+    }
+
+    function advanceStep() {
+      if (!currentLessonSession) return;
+      currentLessonSession.stepIndex++;
+      currentLessonSession.subStep = 0;
+      renderLessonFrame();
+    }
+
+    function confirmExitLesson() {
+      openModal(`
+        <div class="text-center space-y-4">
+          <div class="text-5xl">🥺</div>
+          <h3 class="heading-font text-2xl font-bold text-slate-800">Leave Lesson?</h3>
+          <p class="text-slate-500 text-sm font-semibold">Your current lesson progress won't be saved if you leave now.</p>
+          <div class="flex gap-3 pt-2">
+            <button onclick="closeModal()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-3 rounded-2xl">
+              Keep Learning
+            </button>
+            <button onclick="closeModal(); navigate('home');" class="flex-1 bg-frenchRed hover:bg-red-600 text-white font-bold py-3 rounded-2xl">
+              Exit
+            </button>
+          </div>
+        </div>
+      `);
+    }
+
+    // ----------------------------------------------------
+    // STEP 1 — LEARN: VOCABULARY FLASHCARD CAROUSEL
+    // ----------------------------------------------------
+    function renderStep1Learn(el, lesson) {
+      const vocab = lesson.vocabulary;
+      const currentWord = vocab[currentLessonSession.subStep] || vocab[0];
+
+      el.innerHTML = `
+        <div class="space-y-6 text-center animate-pop-in">
+          <div>
+            <span class="text-xs font-extrabold text-frenchBlue bg-blue-50 px-3 py-1 rounded-full uppercase tracking-wider">
+              Step 1 • Learn Words (${currentLessonSession.subStep + 1} of ${vocab.length})
+            </span>
+            <h3 class="heading-font text-2xl font-bold text-slate-800 mt-2">Listen & Learn 🌟</h3>
+          </div>
+
+          <!-- Big Card -->
+          <div class="max-w-sm mx-auto bg-gradient-to-b from-blue-50 to-indigo-50 border-3 border-blue-200 rounded-3xl p-6 shadow-md game-card relative">
+            <div class="text-6xl mb-3">${currentWord.icon}</div>
+            <h4 class="heading-font text-4xl font-extrabold text-frenchBlue mb-1">${currentWord.french}</h4>
+            <p class="text-sm font-extrabold text-blue-400 mb-2">Pronounce: "${currentWord.phonetic}"</p>
+            <div class="bg-white/80 rounded-2xl py-2 px-4 inline-block font-bold text-slate-700 text-lg shadow-sm">
+              ${currentWord.english}
+            </div>
+            ${currentWord.hint ? `<p class="text-xs text-slate-400 font-bold mt-3">💡 ${currentWord.hint}</p>` : ''}
+          </div>
+
+          <!-- Audio Action Button -->
+          <div>
+            <button onclick="speakFrench('${currentWord.french}'); playSfx('pop');" class="bg-amber-400 hover:bg-amber-500 text-amber-950 font-extrabold px-6 py-3.5 rounded-2xl text-base shadow-lg shadow-amber-200 transition active:scale-95 inline-flex items-center gap-2.5">
+              <i class="fa-solid fa-volume-high text-xl"></i>
+              <span>Listen Pronunciation</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Bottom Controls -->
+        <div class="flex justify-between items-center pt-6 border-t border-slate-100">
+          <button onclick="prevLearnWord()" class="px-5 py-2.5 rounded-2xl font-bold text-sm bg-slate-100 hover:bg-slate-200 text-slate-600 transition ${currentLessonSession.subStep === 0 ? 'opacity-40 pointer-events-none' : ''}">
+            ← Back
+          </button>
+          <button onclick="nextLearnWord()" class="px-7 py-3 rounded-2xl font-extrabold text-sm bg-frenchBlue hover:bg-blue-700 text-white shadow-md shadow-blue-300 transition active:scale-95 flex items-center gap-2">
+            <span>${currentLessonSession.subStep === vocab.length - 1 ? 'Ready to Repeat! 🚀' : 'Next Word →'}</span>
+          </button>
+        </div>
+      `;
+
+      // Auto play audio once on first view
+      speakFrench(currentWord.french);
+    }
+
+    function nextLearnWord() {
+      const vocab = currentLessonSession.lesson.vocabulary;
+      if (currentLessonSession.subStep < vocab.length - 1) {
+        currentLessonSession.subStep++;
+        renderStepContent();
+      } else {
+        awardXP(10, "Vocabulary learned!");
+        advanceStep();
+      }
+    }
+
+    function prevLearnWord() {
+      if (currentLessonSession.subStep > 0) {
+        currentLessonSession.subStep--;
+        renderStepContent();
+      }
+    }
+
+    // ----------------------------------------------------
+    // STEP 2 — REPEAT: SPEAK IT ALOUD (WITH MIC / AUDIO FALLBACK)
+    // ----------------------------------------------------
+    function renderStep2Repeat(el, lesson) {
+      const vocab = lesson.vocabulary;
+      const targetWord = vocab[currentLessonSession.subStep] || vocab[0];
+
+      el.innerHTML = `
+        <div class="space-y-6 text-center animate-pop-in">
+          <div>
+            <span class="text-xs font-extrabold text-purple-600 bg-purple-50 px-3 py-1 rounded-full uppercase tracking-wider">
+              Step 2 • Repeat Aloud (${currentLessonSession.subStep + 1} of ${Math.min(4, vocab.length)})
+            </span>
+            <h3 class="heading-font text-2xl font-bold text-slate-800 mt-2">Say It Loud & Proud! 🗣️</h3>
+          </div>
+
+          <div class="max-w-sm mx-auto bg-purple-50 border-3 border-purple-200 rounded-3xl p-6">
+            <div class="text-5xl mb-2">${targetWord.icon}</div>
+            <h4 class="heading-font text-3xl font-extrabold text-purple-700">${targetWord.french}</h4>
+            <p class="text-xs font-bold text-purple-400 mt-1">"${targetWord.phonetic}"</p>
+            <p class="text-sm font-semibold text-slate-600 mt-2">Meaning: ${targetWord.english}</p>
+          </div>
+
+          <!-- Micro / Practice Feedback Area -->
+          <div id="repeat-feedback-box" class="min-h-[50px] flex items-center justify-center">
+            <p class="text-sm font-bold text-slate-400">Tap the mic button and say "${targetWord.french}"!</p>
+          </div>
+
+          <!-- Controls -->
+          <div class="flex justify-center items-center gap-4">
+            <button onclick="speakFrench('${targetWord.french}')" class="w-14 h-14 rounded-2xl bg-blue-100 hover:bg-blue-200 text-frenchBlue flex items-center justify-center text-xl transition" title="Listen again">
+              <i class="fa-solid fa-volume-high"></i>
+            </button>
+            <button id="mic-trigger-btn" onclick="startSpeechPractice('${targetWord.french}')" class="w-20 h-20 rounded-3xl bg-gradient-to-tr from-frenchRed to-rose-500 hover:from-red-600 hover:to-rose-600 text-white flex items-center justify-center text-3xl shadow-xl shadow-red-300 transition active:scale-95 animate-bounce-slow">
+              <i class="fa-solid fa-microphone"></i>
+            </button>
+          </div>
+        </div>
+
+        <div class="flex justify-end pt-6 border-t border-slate-100">
+          <button onclick="nextRepeatWord()" class="px-7 py-3 rounded-2xl font-extrabold text-sm bg-purple-600 hover:bg-purple-700 text-white shadow-md shadow-purple-200 transition active:scale-95">
+            Continue →
+          </button>
+        </div>
+      `;
+    }
+
+    function startSpeechPractice(expectedWord) {
+      const feedback = document.getElementById('repeat-feedback-box');
+      const micBtn = document.getElementById('mic-trigger-btn');
+      
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SpeechRecognition) {
+        // Friendly Fallback if browser doesn't have Web Speech Recognition
+        feedback.innerHTML = `
+          <div class="bg-emerald-100 border border-emerald-300 text-emerald-800 px-4 py-2 rounded-2xl text-xs font-bold animate-pop-in">
+            🌟 Fantastique! Great job saying it aloud!
+          </div>
+        `;
+        playSfx('correct');
+        awardXP(5, "Speaking practice");
+        return;
+      }
+
+      const recognition = new SpeechRecognition();
+      recognition.lang = 'fr-FR';
+      recognition.interimResults = false;
+      recognition.maxAlternatives = 3;
+
+      if (micBtn) micBtn.classList.add('ring-4', 'ring-red-300', 'animate-pulse');
+      feedback.innerHTML = `<span class="text-sm font-bold text-frenchBlue animate-pulse">Listening to your French voice... 🎙️</span>`;
+
+      recognition.onresult = (event) => {
+        if (micBtn) micBtn.classList.remove('ring-4', 'ring-red-300', 'animate-pulse');
+        const transcript = event.results[0][0].transcript.toLowerCase();
+        const expected = expectedWord.toLowerCase();
+
+        if (transcript.includes(expected) || expected.includes(transcript)) {
+          feedback.innerHTML = `
+            <div class="bg-emerald-100 border border-emerald-300 text-emerald-800 px-4 py-2 rounded-2xl text-xs font-bold animate-pop-in">
+              🌟 Très bien! You pronounced "${expectedWord}" perfectly!
+            </div>
+          `;
+          playSfx('correct');
+          awardXP(10, "Great pronunciation!");
+        } else {
+          feedback.innerHTML = `
+            <div class="bg-amber-100 border border-amber-300 text-amber-800 px-4 py-2 rounded-2xl text-xs font-bold animate-pop-in">
+              😊 Good try! We heard "${transcript}". Let's say "${expectedWord}" together!
+            </div>
+          `;
+          playSfx('pop');
+        }
+      };
+
+      recognition.onerror = () => {
+        if (micBtn) micBtn.classList.remove('ring-4', 'ring-red-300', 'animate-pulse');
+        feedback.innerHTML = `
+          <div class="bg-emerald-100 border border-emerald-300 text-emerald-800 px-4 py-2 rounded-2xl text-xs font-bold animate-pop-in">
+            🌟 Good practice! Keep saying it loud and clear!
+          </div>
+        `;
+        playSfx('correct');
+      };
+
+      recognition.start();
+    }
+
+    function nextRepeatWord() {
+      const vocab = currentLessonSession.lesson.vocabulary;
+      const maxSub = Math.min(3, vocab.length - 1);
+      if (currentLessonSession.subStep < maxSub) {
+        currentLessonSession.subStep++;
+        renderStepContent();
+      } else {
+        advanceStep();
+      }
+    }
+
+    // ----------------------------------------------------
+    // STEP 3 — PRACTICE: MULTIPLE CHOICE, MATCHING, SENTENCE BUILDER
+    // ----------------------------------------------------
+    function renderStep3Practice(el, lesson) {
+      const activities = lesson.practiceActivities || [];
+      const currentAct = activities[currentLessonSession.subStep] || activities[0];
+
+      el.innerHTML = `
+        <div class="space-y-6 animate-pop-in">
+          <div>
+            <span class="text-xs font-extrabold text-emerald-700 bg-emerald-50 px-3 py-1 rounded-full uppercase tracking-wider">
+              Step 3 • Practice (${currentLessonSession.subStep + 1} of ${activities.length})
+            </span>
+            <h3 class="heading-font text-2xl font-bold text-slate-800 mt-2">Fun Activity Time ✍️</h3>
+          </div>
+
+          <div id="practice-activity-arena">
+            <!-- Dynamic Practice Type -->
+          </div>
+
+          <div id="practice-feedback-area" class="min-h-[40px]"></div>
+        </div>
+      `;
+
+      const arena = document.getElementById('practice-activity-arena');
+      if (currentAct.type === 'choice') {
+        renderChoiceActivity(arena, currentAct);
+      } else if (currentAct.type === 'match') {
+        renderMatchingActivity(arena, currentAct);
+      } else if (currentAct.type === 'order') {
+        renderSentenceOrderingActivity(arena, currentAct);
+      } else if (currentAct.type === 'fill') {
+        renderFillInBlankActivity(arena, currentAct);
+      }
+    }
+
+    function renderChoiceActivity(container, act) {
+      container.innerHTML = `
+        <div class="space-y-4">
+          <div class="bg-blue-50 p-4 rounded-2xl border-2 border-blue-200">
+            <h4 class="heading-font text-xl font-bold text-slate-800">${act.question}</h4>
+            ${act.helper ? `<p class="text-xs font-semibold text-slate-500 mt-1">💡 Hint: ${act.helper}</p>` : ''}
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            ${act.options.map((opt, idx) => `
+              <button onclick="handleChoiceAnswer(${idx}, ${act.answer})" class="practice-opt-btn p-4 rounded-2xl border-2 border-slate-200 font-extrabold text-slate-700 hover:border-blue-400 hover:bg-blue-50/50 transition text-left flex items-center justify-between">
+                <span>${opt}</span>
+                <span class="w-6 h-6 rounded-full bg-slate-100 flex items-center justify-center text-xs text-slate-400 font-bold">${String.fromCharCode(65 + idx)}</span>
+              </button>
+            `).join('')}
+          </div>
+        </div>
+      `;
+    }
+
+    function handleChoiceAnswer(selectedIdx, correctIdx) {
+      const feedback = document.getElementById('practice-feedback-area');
+      if (selectedIdx === correctIdx) {
+        playSfx('correct');
+        awardXP(10, "Correct practice answer");
+        feedback.innerHTML = `
+          <div class="bg-emerald-100 text-emerald-800 p-3 rounded-2xl font-bold text-sm flex items-center justify-between animate-pop-in">
+            <span>🎉 Excellent! That is correct!</span>
+            <button onclick="nextPracticeActivity()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-1.5 rounded-xl font-extrabold">Next →</button>
+          </div>
+        `;
+      } else {
+        playSfx('incorrect');
+        feedback.innerHTML = `
+          <div class="bg-amber-100 text-amber-800 p-3 rounded-2xl font-bold text-sm animate-pop-in">
+            😊 Almost! Give it another try!
+          </div>
+        `;
+      }
+    }
+
+    function renderMatchingActivity(container, act) {
+      let selectedLeft = null;
+      let matchedCount = 0;
+      const pairs = act.pairs;
+
+      const frWords = [...pairs.map(p => p.fr)].sort(() => Math.random() - 0.5);
+      const enWords = [...pairs.map(p => p.en)].sort(() => Math.random() - 0.5);
+
+      container.innerHTML = `
+        <div class="space-y-4">
+          <p class="text-sm font-bold text-slate-600">Match the French words on the left with their English meanings!</p>
+          <div class="grid grid-cols-2 gap-4">
+            <div id="match-col-left" class="space-y-2">
+              ${frWords.map(w => `
+                <button data-word="${w}" onclick="selectMatchTile(this, 'left')" class="w-full p-3 rounded-2xl border-2 border-blue-200 bg-blue-50/50 font-bold text-slate-700 hover:border-frenchBlue transition text-sm">
+                  ${w}
+                </button>
+              `).join('')}
+            </div>
+            <div id="match-col-right" class="space-y-2">
+              ${enWords.map(w => `
+                <button data-word="${w}" onclick="selectMatchTile(this, 'right')" class="w-full p-3 rounded-2xl border-2 border-purple-200 bg-purple-50/50 font-bold text-slate-700 hover:border-purple-500 transition text-sm">
+                  ${w}
+                </button>
+              `).join('')}
+            </div>
+          </div>
+        </div>
+      `;
+
+      window.selectMatchTile = (btn, side) => {
+        playSfx('pop');
+        if (side === 'left') {
+          document.querySelectorAll('#match-col-left button').forEach(b => b.classList.remove('ring-4', 'ring-blue-400'));
+          btn.classList.add('ring-4', 'ring-blue-400');
+          selectedLeft = btn;
+        } else if (side === 'right' && selectedLeft) {
+          const frWord = selectedLeft.getAttribute('data-word');
+          const enWord = btn.getAttribute('data-word');
+          const pair = pairs.find(p => p.fr === frWord && p.en === enWord);
+
+          if (pair) {
+            playSfx('correct');
+            selectedLeft.classList.remove('ring-4', 'ring-blue-400');
+            selectedLeft.classList.add('bg-emerald-100', 'border-emerald-400', 'text-emerald-700', 'pointer-events-none');
+            btn.classList.add('bg-emerald-100', 'border-emerald-400', 'text-emerald-700', 'pointer-events-none');
+            selectedLeft = null;
+            matchedCount++;
+
+            if (matchedCount === pairs.length) {
+              awardXP(15, "All pairs matched!");
+              document.getElementById('practice-feedback-area').innerHTML = `
+                <div class="bg-emerald-100 text-emerald-800 p-3 rounded-2xl font-bold text-sm flex items-center justify-between mt-3 animate-pop-in">
+                  <span>🌟 Super Matcher! All pairs found!</span>
+                  <button onclick="nextPracticeActivity()" class="bg-emerald-600 text-white px-4 py-1.5 rounded-xl font-bold">Next →</button>
+                </div>
+              `;
+            }
+          } else {
+            playSfx('incorrect');
+            btn.classList.add('bg-red-100');
+            setTimeout(() => btn.classList.remove('bg-red-100'), 500);
+          }
+        }
+      };
+    }
+
+    function renderSentenceOrderingActivity(container, act) {
+      let chosenWords = [];
+      const availableWords = [...act.words].sort(() => Math.random() - 0.5);
+
+      function updateOrderUI() {
+        container.innerHTML = `
+          <div class="space-y-4">
+            <p class="text-sm font-bold text-slate-600">${act.prompt}</p>
+
+            <!-- Target Construction Area -->
+            <div class="min-h-[60px] p-3 rounded-2xl border-2 border-dashed border-blue-300 bg-blue-50/50 flex flex-wrap gap-2 items-center">
+              ${chosenWords.length === 0 ? '<span class="text-xs text-slate-400 font-bold">Tap the words below in order...</span>' : ''}
+              ${chosenWords.map((w, idx) => `
+                <button onclick="removeOrderWord(${idx})" class="bg-frenchBlue text-white font-extrabold px-3 py-1.5 rounded-xl text-sm shadow-sm flex items-center gap-1.5 animate-pop-in">
+                  <span>${w}</span> <i class="fa-solid fa-xmark text-xs opacity-70"></i>
+                </button>
+              `).join('')}
+            </div>
+
+            <!-- Available words -->
+            <div class="flex flex-wrap gap-2">
+              ${availableWords.map((w, idx) => `
+                <button onclick="addOrderWord('${w}')" class="bg-white border-2 border-slate-200 hover:border-frenchBlue font-extrabold text-slate-700 px-4 py-2 rounded-xl text-sm shadow-sm transition">
+                  ${w}
+                </button>
+              `).join('')}
+            </div>
+            
+            <div>
+              <button onclick="checkSentenceOrder()" class="bg-emerald-500 hover:bg-emerald-600 text-white font-extrabold px-6 py-2.5 rounded-xl text-sm shadow-md transition">
+                Check Sentence 🌟
+              </button>
+            </div>
+          </div>
+        `;
+      }
+
+      window.addOrderWord = (word) => {
+        playSfx('pop');
+        chosenWords.push(word);
+        updateOrderUI();
+      };
+
+      window.removeOrderWord = (idx) => {
+        playSfx('pop');
+        chosenWords.splice(idx, 1);
+        updateOrderUI();
+      };
+
+      window.checkSentenceOrder = () => {
+        const feedback = document.getElementById('practice-feedback-area');
+        const isMatch = chosenWords.join(' ') === act.correctOrder.join(' ');
+        if (isMatch) {
+          playSfx('correct');
+          awardXP(10, "Sentence constructed");
+          feedback.innerHTML = `
+            <div class="bg-emerald-100 text-emerald-800 p-3 rounded-2xl font-bold text-sm flex items-center justify-between mt-3 animate-pop-in">
+              <span>🎉 Fantastique! Correct order!</span>
+              <button onclick="nextPracticeActivity()" class="bg-emerald-600 text-white px-4 py-1.5 rounded-xl font-bold">Next →</button>
+            </div>
+          `;
+        } else {
+          playSfx('incorrect');
+          feedback.innerHTML = `
+            <div class="bg-amber-100 text-amber-800 p-3 rounded-2xl font-bold text-sm mt-3 animate-pop-in">
+              😊 Almost! Try changing the word order.
+            </div>
+          `;
+        }
+      };
+
+      updateOrderUI();
+    }
+
+    function renderFillInBlankActivity(container, act) {
+      container.innerHTML = `
+        <div class="space-y-4">
+          <p class="text-sm font-bold text-slate-600">${act.prompt}</p>
+          <div class="bg-purple-50 p-5 rounded-2xl border-2 border-purple-200 text-center">
+            <h4 class="heading-font text-2xl font-extrabold text-purple-900">${act.sentence}</h4>
+          </div>
+
+          <div class="grid grid-cols-3 gap-3">
+            ${act.options.map((opt, idx) => `
+              <button onclick="handleChoiceAnswer(${idx}, ${act.answer})" class="p-3.5 rounded-2xl border-2 border-slate-200 font-extrabold text-slate-700 hover:border-purple-400 hover:bg-purple-50 transition text-center text-base">
+                ${opt}
+              </button>
+            `).join('')}
+          </div>
+        </div>
+      `;
+    }
+
+    function nextPracticeActivity() {
+      const activities = currentLessonSession.lesson.practiceActivities || [];
+      if (currentLessonSession.subStep < activities.length - 1) {
+        currentLessonSession.subStep++;
+        renderStepContent();
+      } else {
+        advanceStep();
+      }
+    }
+
+    // ----------------------------------------------------
+    // STEP 4 — LISTENING: NATIVE AUDIO COMPREHENSION
+    // ----------------------------------------------------
+    function renderStep4Listening(el, lesson) {
+      const listenData = lesson.listening || {
+        audioText: "Bonjour!",
+        question: "What did you hear?",
+        options: ["Hello", "Goodbye", "Thank you"],
+        answer: 0
+      };
+
+      el.innerHTML = `
+        <div class="space-y-6 text-center animate-pop-in">
+          <div>
+            <span class="text-xs font-extrabold text-amber-600 bg-amber-50 px-3 py-1 rounded-full uppercase tracking-wider">
+              Step 4 • Listening Ear 🎧
+            </span>
+            <h3 class="heading-font text-2xl font-bold text-slate-800 mt-2">What Did You Hear?</h3>
+            <p class="text-xs font-semibold text-slate-400">Tap the big audio button and choose the correct answer</p>
+          </div>
+
+          <!-- Big Audio Play Button -->
+          <div class="py-4">
+            <button onclick="speakFrench('${listenData.audioText}'); playSfx('pop');" class="w-24 h-24 rounded-3xl bg-amber-400 hover:bg-amber-500 text-amber-950 flex items-center justify-center text-4xl shadow-xl shadow-amber-200 mx-auto transition active:scale-95 animate-bounce-slow">
+              <i class="fa-solid fa-volume-high"></i>
+            </button>
+          </div>
+
+          <!-- Question & Choices -->
+          <div class="max-w-md mx-auto space-y-3 text-left">
+            <h4 class="heading-font font-bold text-slate-700 text-center">${listenData.question}</h4>
+            <div class="space-y-2">
+              ${listenData.options.map((opt, idx) => `
+                <button onclick="handleListeningChoice(${idx}, ${listenData.answer})" class="w-full p-3.5 rounded-2xl border-2 border-slate-200 hover:border-amber-400 hover:bg-amber-50/50 font-bold text-slate-700 text-left transition flex items-center justify-between">
+                  <span>${opt}</span>
+                  <span class="w-6 h-6 rounded-full bg-slate-100 text-slate-400 text-xs flex items-center justify-center font-bold">${idx + 1}</span>
+                </button>
+              `).join('')}
+            </div>
+          </div>
+
+          <div id="listening-feedback" class="min-h-[40px]"></div>
+        </div>
+      `;
+
+      speakFrench(listenData.audioText);
+    }
+
+    function handleListeningChoice(selected, correct) {
+      const feedback = document.getElementById('listening-feedback');
+      if (selected === correct) {
+        playSfx('correct');
+        awardXP(15, "Sharp listening ears!");
+        feedback.innerHTML = `
+          <div class="bg-emerald-100 text-emerald-800 p-3 rounded-2xl font-bold text-sm flex items-center justify-between animate-pop-in">
+            <span>🎉 Bravo! You understood the French sentence!</span>
+            <button onclick="advanceStep()" class="bg-emerald-600 text-white px-4 py-1.5 rounded-xl font-bold">Continue →</button>
+          </div>
+        `;
+      } else {
+        playSfx('incorrect');
+        feedback.innerHTML = `
+          <div class="bg-amber-100 text-amber-800 p-3 rounded-2xl font-bold text-sm animate-pop-in">
+            😊 Listen carefully once more and try again!
+          </div>
+        `;
+      }
+    }
+
+    // ----------------------------------------------------
+    // STEP 5 — SPEAKING: FULL GUIDED PHRASE
+    // ----------------------------------------------------
+    function renderStep5Speaking(el, lesson) {
+      const spk = lesson.speaking || { target: "Bonjour", prompt: "Say 'Bonjour!'" };
+
+      el.innerHTML = `
+        <div class="space-y-6 text-center animate-pop-in">
+          <div>
+            <span class="text-xs font-extrabold text-frenchBlue bg-blue-50 px-3 py-1 rounded-full uppercase tracking-wider">
+              Step 5 • Speaking Stage 🎤
+            </span>
+            <h3 class="heading-font text-2xl font-bold text-slate-800 mt-2">${spk.prompt}</h3>
+          </div>
+
+          <div class="max-w-md mx-auto bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-3xl p-6 shadow-lg">
+            <span class="text-xs font-bold text-blue-200 uppercase tracking-wider">Say This Phrase:</span>
+            <h4 class="heading-font text-3xl font-extrabold my-2">"${spk.target}"</h4>
+            <button onclick="speakFrench('${spk.target}')" class="bg-white/20 hover:bg-white/30 text-white px-4 py-1.5 rounded-full text-xs font-bold transition flex items-center gap-1.5 mx-auto">
+              <i class="fa-solid fa-volume-high"></i> Listen to pronunciation
+            </button>
+          </div>
+
+          <!-- Interaction -->
+          <div class="flex flex-col items-center gap-3">
+            <button onclick="startSpeechPractice('${spk.target}')" class="w-20 h-20 rounded-3xl bg-frenchRed hover:bg-red-600 text-white text-3xl flex items-center justify-center shadow-xl shadow-red-200 transition active:scale-95">
+              <i class="fa-solid fa-microphone"></i>
+            </button>
+            <p class="text-xs font-bold text-slate-400">Tap to record your voice</p>
+          </div>
+
+          <div id="repeat-feedback-box" class="min-h-[40px]"></div>
+        </div>
+
+        <div class="flex justify-end pt-6 border-t border-slate-100">
+          <button onclick="advanceStep()" class="px-7 py-3 rounded-2xl font-extrabold text-sm bg-frenchBlue text-white shadow-md transition">
+            Continue to Mini-Game! 🎮
+          </button>
+        </div>
+      `;
+    }
+
+    // ----------------------------------------------------
+    // STEP 6 — MINI GAME: FAST REINFORCEMENT
+    // ----------------------------------------------------
+    function renderStep6MiniGame(el, lesson) {
+      el.innerHTML = `
+        <div class="space-y-6 text-center animate-pop-in">
+          <div>
+            <span class="text-xs font-extrabold text-pink-600 bg-pink-50 px-3 py-1 rounded-full uppercase tracking-wider">
+              Step 6 • Lesson Mini-Game 🎮
+            </span>
+            <h3 class="heading-font text-2xl font-bold text-slate-800 mt-2">Memory Tile Match</h3>
+            <p class="text-xs font-semibold text-slate-400">Flip cards to match the French words with English meanings!</p>
+          </div>
+
+          <div id="step-minigame-container" class="max-w-md mx-auto">
+            <!-- Game dynamic grid -->
+          </div>
+        </div>
+      `;
+
+      initMemoryGameInContainer(document.getElementById('step-minigame-container'), lesson.vocabulary.slice(0, 4), () => {
+        unlockBadge('game_master');
+        awardXP(20, "Mini-game cleared!");
+        el.innerHTML += `
+          <div class="bg-emerald-100 text-emerald-800 p-4 rounded-3xl font-bold text-sm flex items-center justify-between mt-4 animate-pop-in">
+            <span>🎉 Awesome! You mastered the mini-game!</span>
+            <button onclick="advanceStep()" class="bg-emerald-600 text-white px-5 py-2 rounded-2xl font-extrabold">Go to Final Quiz! ⭐</button>
+          </div>
+        `;
+      });
+    }
+
+    // ----------------------------------------------------
+    // STEP 7 — MINI QUIZ: 5 TEST QUESTIONS
+    // ----------------------------------------------------
+    function renderStep7MiniQuiz(el, lesson) {
+      const quiz = lesson.quiz || [];
+      const qIndex = currentLessonSession.subStep;
+      const q = quiz[qIndex];
+
+      if (qIndex >= quiz.length) {
+        // Quiz complete -> Celebration
+        finishLessonQuiz(lesson);
+        return;
+      }
+
+      el.innerHTML = `
+        <div class="space-y-6 animate-pop-in">
+          <div class="flex justify-between items-center">
+            <div>
+              <span class="text-xs font-extrabold text-amber-600 bg-amber-50 px-3 py-1 rounded-full uppercase tracking-wider">
+                Step 7 • Final Quiz (Question ${qIndex + 1} of ${quiz.length})
+              </span>
+              <h3 class="heading-font text-2xl font-bold text-slate-800 mt-2">Show What You Know! ⭐</h3>
+            </div>
+            <div class="text-amber-500 font-extrabold text-sm flex items-center gap-1">
+              <i class="fa-solid fa-star"></i> Score: ${currentLessonSession.quizScore}/${quiz.length}
+            </div>
+          </div>
+
+          <div class="bg-blue-50/70 p-5 rounded-3xl border-2 border-blue-200">
+            <h4 class="heading-font text-xl font-bold text-slate-800">${q.q}</h4>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            ${q.options.map((opt, idx) => `
+              <button onclick="submitQuizAnswer(${idx}, ${q.ans})" class="p-4 rounded-2xl border-2 border-slate-200 font-extrabold text-slate-700 hover:border-blue-500 hover:bg-blue-50 text-left transition flex items-center justify-between">
+                <span>${opt}</span>
+                <span class="w-6 h-6 rounded-full bg-slate-100 text-slate-400 text-xs flex items-center justify-center font-bold">${String.fromCharCode(65 + idx)}</span>
+              </button>
+            `).join('')}
+          </div>
+
+          <div id="quiz-question-feedback" class="min-h-[40px]"></div>
+        </div>
+      `;
+    }
+
+    function submitQuizAnswer(selected, correct) {
+      const feedback = document.getElementById('quiz-question-feedback');
+      const isCorrect = selected === correct;
+
+      if (isCorrect) {
+        playSfx('correct');
+        currentLessonSession.quizScore++;
+        feedback.innerHTML = `
+          <div class="bg-emerald-100 text-emerald-800 p-3 rounded-2xl font-bold text-sm animate-pop-in">
+            🌟 Correct! Fantastic job!
+          </div>
+        `;
+      } else {
+        playSfx('incorrect');
+        feedback.innerHTML = `
+          <div class="bg-amber-100 text-amber-800 p-3 rounded-2xl font-bold text-sm animate-pop-in">
+            😊 Good try! Let's keep moving!
+          </div>
+        `;
+      }
+
+      setTimeout(() => {
+        currentLessonSession.subStep++;
+        renderStepContent();
+      }, 1100);
+    }
+
+    // ----------------------------------------------------
+    // LESSON COMPLETION CELEBRATION SCREEN
+    // ----------------------------------------------------
+    function finishLessonQuiz(lesson) {
+      const score = currentLessonSession.quizScore;
+      const total = (lesson.quiz || []).length;
+      const accuracy = Math.round((score / total) * 100);
+
+      // Save progress to state
+      if (!state.completedLessons.includes(lesson.id)) {
+        state.completedLessons.push(lesson.id);
+      }
+      if (state.unlockedLesson <= lesson.id && lesson.id < 30) {
+        state.unlockedLesson = lesson.id + 1;
+      }
+      state.quizScores[lesson.id] = accuracy;
+      
+      // Add vocabulary to mastered
+      lesson.vocabulary.forEach(v => {
+        if (!state.vocabMastered.includes(v.french)) {
+          state.vocabMastered.push(v.french);
+        }
+      });
+
+      // Unlock lesson badge
+      if (lesson.badge) {
+        unlockBadge(lesson.badge.id);
+      }
+      if (accuracy === 100) {
+        unlockBadge('perfect_quiz');
+      }
+
+      awardXP(50, `Completed Lesson ${lesson.id}!`);
+      saveAppState();
+
+      // Confetti & SFX celebration
+      playSfx('win');
+      confetti({ particleCount: 120, spread: 80, origin: { y: 0.5 } });
+
+      renderLessonCelebration(document.getElementById('lesson-step-content'), lesson, score, total, accuracy);
+    }
+
+    function renderLessonCelebration(container, lesson, score = 5, total = 5, accuracy = 100) {
+      container.innerHTML = `
+        <div class="text-center space-y-6 animate-pop-in py-4">
+          <div class="text-6xl animate-bounce-slow">🎉</div>
+          <div>
+            <span class="text-xs font-extrabold bg-emerald-100 text-emerald-700 px-3.5 py-1 rounded-full uppercase tracking-wider">
+              Félicitations!
+            </span>
+            <h3 class="heading-font text-3xl sm:text-4xl font-extrabold text-slate-800 mt-2">You Completed Lesson ${lesson.id}!</h3>
+            <p class="text-slate-500 font-semibold text-sm">You are becoming a true French superstar!</p>
+          </div>
+
+          <!-- Stats Grid -->
+          <div class="grid grid-cols-3 gap-3 max-w-md mx-auto">
+            <div class="bg-purple-50 border-2 border-purple-200 p-3 rounded-2xl">
+              <span class="text-xs text-purple-500 font-bold block">XP Gained</span>
+              <span class="heading-font text-2xl font-bold text-softPurple">+50 ⭐</span>
+            </div>
+            <div class="bg-amber-50 border-2 border-amber-200 p-3 rounded-2xl">
+              <span class="text-xs text-amber-600 font-bold block">Quiz Score</span>
+              <span class="heading-font text-2xl font-bold text-amber-700">${score}/${total}</span>
+            </div>
+            <div class="bg-emerald-50 border-2 border-emerald-200 p-3 rounded-2xl">
+              <span class="text-xs text-emerald-600 font-bold block">Words</span>
+              <span class="heading-font text-2xl font-bold text-emerald-700">+${lesson.vocabulary.length} 📚</span>
+            </div>
+          </div>
+
+          <!-- Badge Showcase -->
+          ${
+            lesson.badge
+              ? `
+              <div class="bg-amber-100/70 border-2 border-amber-300 rounded-2xl p-4 max-w-sm mx-auto flex items-center gap-4 text-left">
+                <span class="text-4xl">${lesson.badge.icon}</span>
+                <div>
+                  <span class="text-xs font-bold text-amber-700 uppercase">New Badge Awarded!</span>
+                  <h4 class="heading-font font-bold text-slate-800">${lesson.badge.name}</h4>
+                  <p class="text-xs font-semibold text-slate-500">${lesson.badge.description}</p>
+                </div>
+              </div>
+            `
+              : ''
+          }
+
+          <!-- Buttons -->
+          <div class="flex flex-col sm:flex-row gap-3 justify-center pt-4">
+            <button onclick="navigate('lesson', { lessonId: ${lesson.id} })" class="px-6 py-3 rounded-2xl font-bold text-sm bg-slate-100 hover:bg-slate-200 text-slate-700 transition">
+              🔄 Replay Lesson
+            </button>
+            <button onclick="navigate('map')" class="px-8 py-3 rounded-2xl font-extrabold text-sm bg-gradient-to-r from-frenchBlue to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg shadow-blue-300 transition active:scale-95">
+              Next Lesson on Map →
+            </button>
+          </div>
+        </div>
+      `;
+    }
+  </script>
+
+  <!-- STANDALONE GAMES ENGINE (MEMORY MATCH & CATCHER) -->
+  <script>
+    // 1. REUSABLE MEMORY GAME
+    function initMemoryGameInContainer(container, vocabList, onCompleteCallback) {
+      const cards = [];
+      vocabList.forEach(item => {
+        cards.push({ id: item.french, label: item.french, isFr: true, phonetic: item.phonetic });
+        cards.push({ id: item.french, label: item.english, isFr: false });
+      });
+      cards.sort(() => Math.random() - 0.5);
+
+      let flippedCards = [];
+      let matchedPairs = 0;
+
+      container.innerHTML = `
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+          ${cards.map((card, idx) => `
+            <div data-idx="${idx}" class="mem-card h-24 rounded-2xl bg-blue-100 border-2 border-blue-300 flex items-center justify-center text-center p-2 cursor-pointer font-bold text-sm text-slate-700 hover:bg-blue-200 transition select-none">
+              <span class="hidden mem-text">${card.label}</span>
+              <span class="mem-back text-2xl">🥐</span>
+            </div>
+          `).join('')}
+        </div>
+      `;
+
+      const cardEls = container.querySelectorAll('.mem-card');
+      cardEls.forEach(cardEl => {
+        cardEl.addEventListener('click', () => {
+          const idx = cardEl.getAttribute('data-idx');
+          const cardData = cards[idx];
+
+          if (cardEl.classList.contains('flipped') || cardEl.classList.contains('matched') || flippedCards.length === 2) {
+            return;
+          }
+
+          playSfx('pop');
+          cardEl.classList.add('flipped', 'bg-white', 'border-frenchBlue');
+          cardEl.querySelector('.mem-text').classList.remove('hidden');
+          cardEl.querySelector('.mem-back').classList.add('hidden');
+
+          if (cardData.isFr) {
+            speakFrench(cardData.label);
+          }
+
+          flippedCards.push({ el: cardEl, data: cardData });
+
+          if (flippedCards.length === 2) {
+            const [first, second] = flippedCards;
+            if (first.data.id === second.data.id && first.data.isFr !== second.data.isFr) {
+              // Match!
+              playSfx('correct');
+              first.el.classList.add('matched', 'bg-emerald-100', 'border-emerald-400', 'text-emerald-800');
+              second.el.classList.add('matched', 'bg-emerald-100', 'border-emerald-400', 'text-emerald-800');
+              flippedCards = [];
+              matchedPairs++;
+              if (matchedPairs === vocabList.length) {
+                if (onCompleteCallback) onCompleteCallback();
+              }
+            } else {
+              // No match
+              playSfx('incorrect');
+              setTimeout(() => {
+                first.el.classList.remove('flipped', 'bg-white', 'border-frenchBlue');
+                first.el.querySelector('.mem-text').classList.add('hidden');
+                first.el.querySelector('.mem-back').classList.remove('hidden');
+
+                second.el.classList.remove('flipped', 'bg-white', 'border-frenchBlue');
+                second.el.querySelector('.mem-text').classList.add('hidden');
+                second.el.querySelector('.mem-back').classList.remove('hidden');
+                flippedCards = [];
+              }, 900);
+            }
+          }
+        });
+      });
+    }
+
+    function startStandaloneMemoryGame() {
+      const arena = document.getElementById('game-active-arena');
+      if (!arena) return;
+      const vocab = CURRICULUM[0].vocabulary.concat(CURRICULUM[1].vocabulary).slice(0, 4);
+
+      arena.innerHTML = `
+        <div class="bg-white rounded-3xl p-6 border-3 border-indigo-200 shadow-lg animate-pop-in space-y-4">
+          <div class="flex justify-between items-center">
+            <h3 class="heading-font text-2xl font-bold text-indigo-900">🃏 French Memory Cards</h3>
+            <button onclick="document.getElementById('game-active-arena').innerHTML=''" class="text-slate-400 hover:text-slate-600 font-bold text-sm">Close Game</button>
+          </div>
+          <div id="standalone-memory-slot"></div>
+        </div>
+      `;
+
+      initMemoryGameInContainer(document.getElementById('standalone-memory-slot'), vocab, () => {
+        playSfx('win');
+        unlockBadge('game_master');
+        awardXP(25, "Memory Match Victory!");
+        confetti({ particleCount: 80, spread: 60 });
+        showToast("🌟 Game Victory! +25 XP", "purple");
+      });
+    }
+
+    // 2. REUSABLE WORD BUBBLE CATCHER
+    function startStandaloneCatcherGame() {
+      const arena = document.getElementById('game-active-arena');
+      if (!arena) return;
+
+      const words = [
+        { fr: "Bonjour", en: "Hello" },
+        { fr: "Merci", en: "Thank you" },
+        { fr: "Bleu", en: "Blue" },
+        { fr: "Rouge", en: "Red" },
+        { fr: "Un", en: "1" },
+        { fr: "Dix", en: "10" }
+      ];
+
+      let target = words[Math.floor(Math.random() * words.length)];
+      let score = 0;
+
+      arena.innerHTML = `
+        <div class="bg-white rounded-3xl p-6 border-3 border-pink-200 shadow-lg animate-pop-in space-y-4">
+          <div class="flex justify-between items-center">
+            <div>
+              <h3 class="heading-font text-2xl font-bold text-pink-900">🎈 Word Catcher</h3>
+              <p class="text-xs font-bold text-pink-500">Tap the bubble that matches the target word!</p>
+            </div>
+            <span class="heading-font text-xl font-bold text-pink-600">Score: <span id="catcher-score">0</span>/5</span>
+          </div>
+
+          <div class="bg-pink-50 p-4 rounded-2xl text-center border-2 border-pink-200">
+            <span class="text-xs font-bold text-pink-400 uppercase">Find the French word for:</span>
+            <h4 id="catcher-target-prompt" class="heading-font text-3xl font-extrabold text-pink-700">${target.en}</h4>
+          </div>
+
+          <div id="catcher-bubbles" class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+            <!-- Dynamic Bubble Options -->
+          </div>
+        </div>
+      `;
+
+      function nextRound() {
+        if (score >= 5) {
+          playSfx('win');
+          awardXP(30, "Word Catcher Master!");
+          confetti({ particleCount: 90 });
+          arena.innerHTML = `
+            <div class="bg-emerald-50 rounded-3xl p-6 border-3 border-emerald-300 text-center space-y-3">
+              <span class="text-5xl">🏆</span>
+              <h3 class="heading-font text-2xl font-bold text-emerald-900">You Won Word Catcher!</h3>
+              <p class="text-emerald-700 text-sm font-semibold">+30 XP Awarded!</p>
+              <button onclick="document.getElementById('game-active-arena').innerHTML=''" class="bg-emerald-600 text-white font-bold px-6 py-2.5 rounded-2xl text-sm">Close Arcade</button>
+            </div>
+          `;
+          return;
+        }
+
+        target = words[Math.floor(Math.random() * words.length)];
+        document.getElementById('catcher-target-prompt').innerText = target.en;
+        document.getElementById('catcher-score').innerText = score;
+
+        const shuffled = [...words].sort(() => Math.random() - 0.5);
+        const bubbleContainer = document.getElementById('catcher-bubbles');
+        bubbleContainer.innerHTML = shuffled.map(w => `
+          <button data-fr="${w.fr}" class="bubble-btn p-4 rounded-3xl bg-white border-3 border-pink-200 hover:border-pink-500 font-extrabold text-slate-700 text-lg shadow-sm hover:scale-105 transition flex items-center justify-center gap-2">
+            <span>🎈</span> <span>${w.fr}</span>
+          </button>
+        `).join('');
+
+        bubbleContainer.querySelectorAll('.bubble-btn').forEach(btn => {
+          btn.onclick = () => {
+            if (btn.getAttribute('data-fr') === target.fr) {
+              playSfx('correct');
+              speakFrench(target.fr);
+              score++;
+              nextRound();
+            } else {
+              playSfx('incorrect');
+              btn.classList.add('bg-red-100');
+              setTimeout(() => btn.classList.remove('bg-red-100'), 400);
+            }
+          };
+        });
+      }
+
+      nextRound();
+    }
+  </script>
+
+  <!-- PARENT / TEACHER AREA & MODAL CONTROLS -->
+  <script>
+    function openModal(contentHtml) {
+      const container = document.getElementById('modal-container');
+      const card = document.getElementById('modal-card');
+      card.innerHTML = contentHtml;
+      container.classList.remove('hidden');
+    }
+
+    function closeModal() {
+      document.getElementById('modal-container').classList.add('hidden');
+    }
+
+    function openParentModal() {
+      const totalWords = state.vocabMastered.length;
+      const completedCount = state.completedLessons.length;
+      
+      const scores = Object.values(state.quizScores);
+      const avgScore = scores.length ? Math.round(scores.reduce((a,b)=>a+b,0)/scores.length) : 0;
+
+      openModal(`
+        <div class="space-y-4">
+          <div class="flex items-center justify-between border-b pb-3">
+            <div class="flex items-center gap-2">
+              <span class="text-2xl">👨‍👩‍👧‍👦</span>
+              <h3 class="heading-font text-2xl font-bold text-slate-800">Parent & Teacher Zone</h3>
+            </div>
+            <button onclick="closeModal()" class="w-8 h-8 rounded-full bg-slate-100 text-slate-500 font-bold">✕</button>
+          </div>
+
+          <p class="text-xs text-slate-500 font-medium">
+            This application stores all learner progress 100% locally in your browser. No personal data, email, or advertising trackers are used.
+          </p>
+
+          <!-- Metrics summary -->
+          <div class="grid grid-cols-2 gap-3 text-center">
+            <div class="bg-blue-50 p-3 rounded-2xl border border-blue-200">
+              <span class="text-xs font-bold text-blue-500">Lessons Completed</span>
+              <h4 class="heading-font text-2xl font-bold text-blue-800">${completedCount} / 5</h4>
+            </div>
+            <div class="bg-emerald-50 p-3 rounded-2xl border border-emerald-200">
+              <span class="text-xs font-bold text-emerald-600">Words Learned</span>
+              <h4 class="heading-font text-2xl font-bold text-emerald-800">${totalWords}</h4>
+            </div>
+            <div class="bg-amber-50 p-3 rounded-2xl border border-amber-200">
+              <span class="text-xs font-bold text-amber-600">Average Quiz Score</span>
+              <h4 class="heading-font text-2xl font-bold text-amber-800">${avgScore}%</h4>
+            </div>
+            <div class="bg-purple-50 p-3 rounded-2xl border border-purple-200">
+              <span class="text-xs font-bold text-purple-600">Total XP Earned</span>
+              <h4 class="heading-font text-2xl font-bold text-softPurple">${state.xp} ⭐</h4>
+            </div>
+          </div>
+
+          <!-- Quick Actions -->
+          <div class="pt-3 flex gap-2">
+            <button onclick="resetAllProgress()" class="w-full bg-red-50 hover:bg-red-100 text-frenchRed font-bold text-xs py-3 rounded-2xl border border-red-200 transition">
+              Reset Progress
+            </button>
+            <button onclick="closeModal()" class="w-full bg-frenchBlue hover:bg-blue-700 text-white font-bold text-xs py-3 rounded-2xl transition">
+              Done
+            </button>
+          </div>
+        </div>
+      `);
+    }
+
+    function resetAllProgress() {
+      if (confirm("Are you sure you want to reset all progress and stars for this child?")) {
+        localStorage.removeItem(STORAGE_KEY);
+        state = { ...defaultState };
+        saveAppState();
+        closeModal();
+        navigate('home');
+        showToast("Progress has been reset", "blue");
+      }
+    }
+
+    // INITIAL STARTUP
+    window.addEventListener('DOMContentLoaded', () => {
+      updateNavStats();
+      navigate('home');
+    });
+  </script>
+</body>
+</html>
